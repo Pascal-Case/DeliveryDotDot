@@ -1,0 +1,6 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/delivery?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: delivery_user
+    password: pwd123
+    driver-class-name: com.mysql.cj.jdbc.Driver
