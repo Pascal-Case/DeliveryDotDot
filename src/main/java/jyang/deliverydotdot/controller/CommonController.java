@@ -25,7 +25,6 @@ public class CommonController {
   public ResponseEntity<?> userJoinProcess(
       @RequestBody @Valid UserJoinForm joinForm
   ) {
-    System.out.println(joinForm);
     userService.registerUser(joinForm);
     return ResponseEntity.ok().build();
   }

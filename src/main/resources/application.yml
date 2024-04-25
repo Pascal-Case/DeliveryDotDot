@@ -17,7 +17,8 @@ spring:
         jdbc:
           time_zone: UTC
 
-#logging:
+logging:
+  config: classpath:logback-spring.xml
 #  level:
 #    org.hibernate.orm.jdbc.bind: TRACE
 #    org:
