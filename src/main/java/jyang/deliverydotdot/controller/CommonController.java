@@ -22,7 +22,7 @@ public class CommonController {
 
   @Operation(summary = "유저 회원가입", description = "유저 등록 폼으로 회원가입")
   @PostMapping("/users/join")
-  public ResponseEntity<?> joinProcess(
+  public ResponseEntity<?> userJoinProcess(
       @RequestBody @Valid UserJoinForm joinForm
   ) {
     System.out.println(joinForm);
