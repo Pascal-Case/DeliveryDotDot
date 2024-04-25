@@ -1,6 +1,26 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/delivery?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://localhost:3306/delivery?useSSL=false&allowPublicKeyRetrieval=true
     username: delivery_user
     password: pwd123
     driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        show-sql: true
+        format_sql: true
+        use_sql_comments: true
+        jdbc:
+          time_zone: UTC
+
+#logging:
+#  level:
+#    org.hibernate.orm.jdbc.bind: TRACE
+#    org:
+#      hibernate:
+#        SQL: DEBUG
+#        type: TRACE
