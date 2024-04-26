@@ -22,6 +22,9 @@ public class UserService {
 
   @Transactional
   public void registerUser(UserJoinForm userJoinForm) {
+
+    validateRegisterUser(userJoinForm);
+
     User savedUser = User.builder()
         .loginId(userJoinForm.getLoginId())
         .password(passwordEncoder.encode(userJoinForm.getPassword()))
@@ -32,19 +35,17 @@ public class UserService {
         .authType(LOCAL)
         .build();
 
-    validateRegisterUser(savedUser);
-
     userRepository.save(savedUser);
   }
 
-  private void validateRegisterUser(User user) {
-    if (userRepository.existsByLoginId(user.getLoginId())) {
+  private void validateRegisterUser(UserJoinForm userJoinForm) {
+    if (userRepository.existsByLoginId(userJoinForm.getLoginId())) {
       throw new RuntimeException("이미 등록된 로그인 id 입니다.");
     }
-    if (userRepository.existsByEmail(user.getEmail())) {
+    if (userRepository.existsByEmail(userJoinForm.getEmail())) {
       throw new RuntimeException("이미 등록된 이메일 입니다.");
     }
-    if (userRepository.existsByLoginId(user.getPhone())) {
+    if (userRepository.existsByLoginId(userJoinForm.getPhone())) {
       throw new RuntimeException("이미 등록된 휴대전화 번호 입니다.");
     }
   }

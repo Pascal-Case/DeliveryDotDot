@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
+import java.time.LocalDateTime;
 import jyang.deliverydotdot.type.AuthType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -43,7 +44,7 @@ public class User extends BaseEntity {
 
   private String address;
 
-  private String deletedAt;
+  private LocalDateTime deletedAt;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
