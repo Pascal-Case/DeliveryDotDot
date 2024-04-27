@@ -1,9 +1,13 @@
 package jyang.deliverydotdot.service;
 
 import static jyang.deliverydotdot.type.AuthType.LOCAL;
+import static jyang.deliverydotdot.type.ErrorCode.ALREADY_REGISTERED_EMAIL;
+import static jyang.deliverydotdot.type.ErrorCode.ALREADY_REGISTERED_LOGIN_ID;
+import static jyang.deliverydotdot.type.ErrorCode.ALREADY_REGISTERED_PHONE;
 
 import jyang.deliverydotdot.domain.User;
 import jyang.deliverydotdot.dto.UserJoinForm;
+import jyang.deliverydotdot.exception.RestApiException;
 import jyang.deliverydotdot.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -40,13 +44,13 @@ public class UserService {
 
   private void validateRegisterUser(UserJoinForm userJoinForm) {
     if (userRepository.existsByLoginId(userJoinForm.getLoginId())) {
-      throw new RuntimeException("이미 등록된 로그인 id 입니다.");
+      throw new RestApiException(ALREADY_REGISTERED_LOGIN_ID);
     }
     if (userRepository.existsByEmail(userJoinForm.getEmail())) {
-      throw new RuntimeException("이미 등록된 이메일 입니다.");
+      throw new RestApiException(ALREADY_REGISTERED_EMAIL);
     }
     if (userRepository.existsByLoginId(userJoinForm.getPhone())) {
-      throw new RuntimeException("이미 등록된 휴대전화 번호 입니다.");
+      throw new RestApiException(ALREADY_REGISTERED_PHONE);
     }
   }
 
