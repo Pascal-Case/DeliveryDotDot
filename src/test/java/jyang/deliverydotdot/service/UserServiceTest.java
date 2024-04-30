@@ -1,5 +1,8 @@
 package jyang.deliverydotdot.service;
 
+import static jyang.deliverydotdot.type.ErrorCode.ALREADY_REGISTERED_EMAIL;
+import static jyang.deliverydotdot.type.ErrorCode.ALREADY_REGISTERED_LOGIN_ID;
+import static jyang.deliverydotdot.type.ErrorCode.ALREADY_REGISTERED_PHONE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
@@ -8,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import jyang.deliverydotdot.domain.User;
 import jyang.deliverydotdot.dto.UserJoinForm;
+import jyang.deliverydotdot.exception.RestApiException;
 import jyang.deliverydotdot.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,30 +56,27 @@ public class UserServiceTest {
   @Test
   void 유저생성_실패_이미등록된아이디() {
     when(userRepository.existsByLoginId("userLoginId")).thenReturn(true);
-    Exception exception = assertThrows(RuntimeException.class, () -> {
-      userService.registerUser(validUserJoinForm);
-    });
+    RestApiException exception = assertThrows(RestApiException.class,
+        () -> userService.registerUser(validUserJoinForm));
 
-    assertEquals("이미 등록된 로그인 id 입니다.", exception.getMessage());
+    assertEquals(ALREADY_REGISTERED_LOGIN_ID, exception.getErrorCode());
   }
 
   @Test
   void 유저생성_실패_이미등록된이메일() {
     when(userRepository.existsByEmail("user@example.com")).thenReturn(true);
-    Exception exception = assertThrows(RuntimeException.class, () -> {
-      userService.registerUser(validUserJoinForm);
-    });
+    RestApiException exception = assertThrows(RestApiException.class,
+        () -> userService.registerUser(validUserJoinForm));
 
-    assertEquals("이미 등록된 이메일 입니다.", exception.getMessage());
+    assertEquals(ALREADY_REGISTERED_EMAIL, exception.getErrorCode());
   }
 
   @Test
   void 유저생성_실패_이미등록된휴대전화() {
     when(userRepository.existsByLoginId("010-1234-5678")).thenReturn(true);
-    Exception exception = assertThrows(RuntimeException.class, () -> {
-      userService.registerUser(validUserJoinForm);
-    });
+    RestApiException exception = assertThrows(RestApiException.class,
+        () -> userService.registerUser(validUserJoinForm));
 
-    assertEquals("이미 등록된 휴대전화 번호 입니다.", exception.getMessage());
+    assertEquals(ALREADY_REGISTERED_PHONE, exception.getErrorCode());
   }
 }

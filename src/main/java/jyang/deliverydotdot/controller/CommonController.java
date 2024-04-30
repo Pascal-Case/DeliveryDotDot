@@ -1,9 +1,12 @@
 package jyang.deliverydotdot.controller;
 
+import static org.springframework.http.HttpStatus.CREATED;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jyang.deliverydotdot.dto.UserJoinForm;
+import jyang.deliverydotdot.dto.response.SuccessResponse;
 import jyang.deliverydotdot.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,10 +25,13 @@ public class CommonController {
 
   @Operation(summary = "유저 회원가입", description = "유저 등록 폼으로 회원가입")
   @PostMapping("/users/join")
-  public ResponseEntity<?> userJoinProcess(
+  public ResponseEntity<SuccessResponse<?>> userJoinProcess(
       @RequestBody @Valid UserJoinForm joinForm
   ) {
     userService.registerUser(joinForm);
-    return ResponseEntity.ok().build();
+
+    return ResponseEntity.status(CREATED).body(
+        SuccessResponse.of("유저를 성공적으로 생성했습니다.")
+    );
   }
 }
