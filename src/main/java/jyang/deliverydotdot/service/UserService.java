@@ -6,10 +6,13 @@ import static jyang.deliverydotdot.type.ErrorCode.ALREADY_REGISTERED_LOGIN_ID;
 import static jyang.deliverydotdot.type.ErrorCode.ALREADY_REGISTERED_PHONE;
 
 import jyang.deliverydotdot.domain.User;
+import jyang.deliverydotdot.domain.UserDeliveryAddress;
 import jyang.deliverydotdot.dto.UserJoinForm;
 import jyang.deliverydotdot.exception.RestApiException;
+import jyang.deliverydotdot.repository.UserDeliveryAddressRepository;
 import jyang.deliverydotdot.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.locationtech.jts.geom.Point;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +21,10 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class UserService {
+
+  private final LocationService locationService;
+
+  private final UserDeliveryAddressRepository userDeliveryAddressRepository;
 
   private final UserRepository userRepository;
 
@@ -40,6 +47,20 @@ public class UserService {
         .build();
 
     userRepository.save(savedUser);
+
+    Point coordinates = locationService.getCoordinatesFromAddress(userJoinForm.getAddress());
+
+    System.out.println(coordinates);
+
+    UserDeliveryAddress deliveryAddress = UserDeliveryAddress.builder()
+        .user(savedUser)
+        .addressName("default")
+        .address(userJoinForm.getAddress())
+        .coordinates(coordinates)
+        .isDefaultAddress(true)
+        .build();
+
+    userDeliveryAddressRepository.save(deliveryAddress);
   }
 
   private void validateRegisterUser(UserJoinForm userJoinForm) {

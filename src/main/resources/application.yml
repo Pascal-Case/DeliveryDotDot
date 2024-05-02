@@ -16,6 +16,7 @@ spring:
         use_sql_comments: true
         jdbc:
           time_zone: UTC
+    database-platform: org.hibernate.spatial.dialect.mysql.MySQL56InnoDBSpatialDialect
 
 logging:
   config: classpath:logback-spring.xml
@@ -25,3 +26,7 @@ logging:
 #      hibernate:
 #        SQL: DEBUG
 #        type: TRACE
+
+kakao:
+  api:
+    key: 4c3a33797d731925ec82252b4823a084
