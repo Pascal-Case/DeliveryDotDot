@@ -1,7 +1,9 @@
 package jyang.deliverydotdot.controller;
 
+import static jyang.deliverydotdot.type.ErrorCode.NO_COORDINATES_FOUND_FOR_ADDRESS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -9,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jyang.deliverydotdot.config.SecurityConfig;
 import jyang.deliverydotdot.dto.UserJoinForm;
+import jyang.deliverydotdot.exception.RestApiException;
 import jyang.deliverydotdot.service.UserService;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
@@ -270,5 +273,30 @@ class CommonControllerTest {
             "휴대전화 번호를 입력해 주세요.",
             "주소를 입력해 주세요."
         )));
+  }
+
+  @Test
+  void 고객생성_실패_주소좌표변환실패() throws Exception {
+    //given
+    UserJoinForm user = UserJoinForm.builder()
+        .loginId("loginId123")
+        .password("password123")
+        .name("김제로")
+        .email("abc@deliverydotdot.com")
+        .phone("010-1234-5678")
+        .address("유효하지 않은 주소")
+        .build();
+
+    doThrow(new RestApiException(NO_COORDINATES_FOUND_FOR_ADDRESS)).when(userService)
+        .registerUser(any(UserJoinForm.class));
+
+    //when
+    //then
+    mockMvc.perform(post("/api/v1/common/users/join")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(user)))
+        .andExpect(status().isUnprocessableEntity())
+        .andExpect(jsonPath("$.code").value("NO_COORDINATES_FOUND_FOR_ADDRESS"))
+        .andExpect(jsonPath("$.message").value("주소에 대한 좌표를 찾을 수 없습니다."));
   }
 }
