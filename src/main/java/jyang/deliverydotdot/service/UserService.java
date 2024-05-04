@@ -5,6 +5,7 @@ import static jyang.deliverydotdot.type.ErrorCode.ALREADY_REGISTERED_EMAIL;
 import static jyang.deliverydotdot.type.ErrorCode.ALREADY_REGISTERED_LOGIN_ID;
 import static jyang.deliverydotdot.type.ErrorCode.ALREADY_REGISTERED_PHONE;
 
+import java.util.logging.Logger;
 import jyang.deliverydotdot.domain.User;
 import jyang.deliverydotdot.domain.UserDeliveryAddress;
 import jyang.deliverydotdot.dto.UserJoinForm;
@@ -30,6 +31,8 @@ public class UserService {
 
   private final BCryptPasswordEncoder passwordEncoder;
 
+  private final Logger logger = Logger.getLogger(UserService.class.getName());
+
 
   @Transactional
   public void registerUser(UserJoinForm userJoinForm) {
@@ -50,8 +53,6 @@ public class UserService {
 
     Point coordinates = locationService.getCoordinatesFromAddress(userJoinForm.getAddress());
 
-    System.out.println(coordinates);
-
     UserDeliveryAddress deliveryAddress = UserDeliveryAddress.builder()
         .user(savedUser)
         .addressName("default")
@@ -65,12 +66,15 @@ public class UserService {
 
   private void validateRegisterUser(UserJoinForm userJoinForm) {
     if (userRepository.existsByLoginId(userJoinForm.getLoginId())) {
+      logger.warning("Already registered loginId: " + userJoinForm.getLoginId());
       throw new RestApiException(ALREADY_REGISTERED_LOGIN_ID);
     }
     if (userRepository.existsByEmail(userJoinForm.getEmail())) {
+      logger.warning("Already registered email: " + userJoinForm.getEmail());
       throw new RestApiException(ALREADY_REGISTERED_EMAIL);
     }
     if (userRepository.existsByLoginId(userJoinForm.getPhone())) {
+      logger.warning("Already registered phone: " + userJoinForm.getPhone());
       throw new RestApiException(ALREADY_REGISTERED_PHONE);
     }
   }
