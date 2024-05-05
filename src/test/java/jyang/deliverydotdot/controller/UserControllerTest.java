@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jyang.deliverydotdot.authentication.JwtTokenProvider;
 import jyang.deliverydotdot.config.SecurityConfig;
 import jyang.deliverydotdot.dto.UserJoinForm;
 import jyang.deliverydotdot.exception.RestApiException;
@@ -24,10 +25,10 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(controllers = CommonController.class, includeFilters = {
+@WebMvcTest(controllers = UserController.class, includeFilters = {
     @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SecurityConfig.class)
 })
-class CommonControllerTest {
+class UserControllerTest {
 
   @Autowired
   private MockMvc mockMvc;
@@ -37,6 +38,11 @@ class CommonControllerTest {
 
   @MockBean
   private UserService userService;
+
+  @MockBean
+  private JwtTokenProvider jwtTokenProvider;
+
+  private static final String USER_API_URL = "/api/v1/users/";
 
   @BeforeEach
   public void setup() {
@@ -59,7 +65,7 @@ class CommonControllerTest {
 
     //when
     //then
-    mockMvc.perform(post("/api/v1/common/users/join")
+    mockMvc.perform(post(USER_API_URL + "auth/join")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(user)))
         .andExpect(status().isCreated())
@@ -83,7 +89,7 @@ class CommonControllerTest {
 
     //when
     //then
-    mockMvc.perform(post("/api/v1/common/users/join")
+    mockMvc.perform(post(USER_API_URL + "auth/join")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(user)))
         .andExpect(status().isBadRequest())
@@ -109,7 +115,7 @@ class CommonControllerTest {
 
     //when
     //then
-    mockMvc.perform(post("/api/v1/common/users/join")
+    mockMvc.perform(post(USER_API_URL + "auth/join")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(user)))
         .andExpect(status().isBadRequest())
@@ -135,7 +141,7 @@ class CommonControllerTest {
 
     //when
     //then
-    mockMvc.perform(post("/api/v1/common/users/join")
+    mockMvc.perform(post(USER_API_URL + "auth/join")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(user)))
         .andExpect(status().isBadRequest())
@@ -160,7 +166,7 @@ class CommonControllerTest {
 
     //when
     //then
-    mockMvc.perform(post("/api/v1/common/users/join")
+    mockMvc.perform(post(USER_API_URL + "auth/join")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(user)))
         .andExpect(status().isBadRequest())
@@ -186,7 +192,7 @@ class CommonControllerTest {
 
     //when
     //then
-    mockMvc.perform(post("/api/v1/common/users/join")
+    mockMvc.perform(post(USER_API_URL + "auth/join")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(user)))
         .andExpect(status().isBadRequest())
@@ -211,7 +217,7 @@ class CommonControllerTest {
 
     //when
     //then
-    mockMvc.perform(post("/api/v1/common/users/join")
+    mockMvc.perform(post(USER_API_URL + "auth/join")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(user)))
         .andExpect(status().isBadRequest())
@@ -237,7 +243,7 @@ class CommonControllerTest {
 
     //when
     //then
-    mockMvc.perform(post("/api/v1/common/users/join")
+    mockMvc.perform(post(USER_API_URL + "auth/join")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(user)))
         .andExpect(status().isBadRequest())
@@ -257,7 +263,7 @@ class CommonControllerTest {
 
     //when
     //then
-    mockMvc.perform(post("/api/v1/common/users/join")
+    mockMvc.perform(post(USER_API_URL + "auth/join")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(user)))
         .andExpect(status().isBadRequest())
@@ -292,7 +298,7 @@ class CommonControllerTest {
 
     //when
     //then
-    mockMvc.perform(post("/api/v1/common/users/join")
+    mockMvc.perform(post(USER_API_URL + "auth/join")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(user)))
         .andExpect(status().isUnprocessableEntity())
