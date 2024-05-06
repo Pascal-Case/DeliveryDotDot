@@ -9,8 +9,7 @@ import java.util.stream.Collectors;
 import jyang.deliverydotdot.dto.response.ErrorResponse;
 import jyang.deliverydotdot.dto.response.ErrorResponse.ValidationError;
 import jyang.deliverydotdot.type.ErrorCode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -23,16 +22,15 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
-
-  private final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
   /**
    * handleCustomException 처리 -> 커스텀 에러 처리
    */
   @ExceptionHandler(RestApiException.class)
   public ResponseEntity<Object> handleCustomException(RestApiException e) {
-    logger.error("RestApiException occurred", e);
+    log.error("RestApiException occurred", e);
     ErrorCode errorCode = e.getErrorCode();
     return handleExceptionInternal(errorCode);
   }
@@ -42,7 +40,7 @@ public class GlobalExceptionHandler {
    */
   @ExceptionHandler(IllegalArgumentException.class)
   public ResponseEntity<Object> handleIllegalArgument(IllegalArgumentException e) {
-    logger.error("IllegalArgumentException occurred", e);
+    log.error("IllegalArgumentException occurred", e);
     return handleExceptionInternal(INVALID_REQUEST);
   }
 
@@ -51,7 +49,7 @@ public class GlobalExceptionHandler {
    */
   @ExceptionHandler(DataIntegrityViolationException.class)
   public ResponseEntity<Object> handleDataIntegrityViolation(DataIntegrityViolationException e) {
-    logger.error("DataIntegrityViolationException occurred", e);
+    log.error("DataIntegrityViolationException occurred", e);
     return handleExceptionInternal(INVALID_REQUEST);
   }
 
@@ -61,7 +59,7 @@ public class GlobalExceptionHandler {
    */
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException e) {
-    logger.error("MethodArgumentNotValidException occurred", e);
+    log.error("MethodArgumentNotValidException occurred", e);
     return handleExceptionInternal(e, INVALID_REQUEST);
   }
 
@@ -70,7 +68,7 @@ public class GlobalExceptionHandler {
    */
   @ExceptionHandler(IllegalStateException.class)
   public ResponseEntity<Object> handleIllegalState(IllegalArgumentException e) {
-    logger.error("IllegalStateException occurred", e);
+    log.error("IllegalStateException occurred", e);
     return handleExceptionInternal(INTERNAL_SERVER_ERROR);
   }
 
@@ -79,7 +77,7 @@ public class GlobalExceptionHandler {
    */
   @ExceptionHandler(HttpClientErrorException.class)
   public ResponseEntity<Object> handleHttpClientError(HttpClientErrorException e) {
-    logger.error("HttpClientErrorException occurred", e);
+    log.error("HttpClientErrorException occurred", e);
     return handleExceptionInternal(INVALID_REQUEST);
   }
 
@@ -88,7 +86,7 @@ public class GlobalExceptionHandler {
    */
   @ExceptionHandler(HttpServerErrorException.class)
   public ResponseEntity<Object> handleHttpServerError(HttpServerErrorException e) {
-    logger.error("HttpServerErrorException occurred", e);
+    log.error("HttpServerErrorException occurred", e);
     return handleExceptionInternal(EXTERNAL_API_ERROR);
   }
 
@@ -97,7 +95,7 @@ public class GlobalExceptionHandler {
    */
   @ExceptionHandler(HttpMessageNotReadableException.class)
   public ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException e) {
-    logger.error("HttpMessageNotReadableException occurred", e);
+    log.error("HttpMessageNotReadableException occurred", e);
     return handleExceptionInternal(ErrorCode.UNPROCESSABLE_ENTITY);
   }
 
@@ -106,7 +104,7 @@ public class GlobalExceptionHandler {
    */
   @ExceptionHandler(UsernameNotFoundException.class)
   public ResponseEntity<Object> handleUsernameNotFound(UsernameNotFoundException e) {
-    logger.error("UsernameNotFoundException occurred", e);
+    log.error("UsernameNotFoundException occurred", e);
     return handleExceptionInternal(INVALID_REQUEST);
   }
 
@@ -115,7 +113,7 @@ public class GlobalExceptionHandler {
    */
   @ExceptionHandler(Exception.class)
   public ResponseEntity<Object> handleException(Exception e) {
-    logger.error("Unhandled exception occurred", e);
+    log.error("Unhandled exception occurred", e);
     ErrorCode errorCode = INTERNAL_SERVER_ERROR;
     return ResponseEntity
         .status(errorCode.getHttpStatus())

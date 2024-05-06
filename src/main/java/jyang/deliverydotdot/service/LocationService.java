@@ -9,11 +9,10 @@ import java.nio.charset.StandardCharsets;
 import jyang.deliverydotdot.dto.location.KakaoGeoResponse;
 import jyang.deliverydotdot.exception.RestApiException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -27,9 +26,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class LocationService {
-
-  private static final Logger logger = LoggerFactory.getLogger(LocationService.class);
 
   private final RestTemplate restTemplate;
 
@@ -63,16 +61,16 @@ public class LocationService {
             new Coordinate(Double.parseDouble(document.getX()),
                 Double.parseDouble(document.getY())));
       } else {
-        logger.error("No coordinates found for address: {}", address);
+        log.error("No coordinates found for address: {}", address);
         throw new RestApiException(NO_COORDINATES_FOUND_FOR_ADDRESS);
       }
     } catch (HttpClientErrorException ex) {
-      logger.error(
+      log.error(
           "HttpClientErrorException occurred while fetching coordinates for address: {}, Status code: {}, Response body: {}",
           address, ex.getStatusCode(), ex.getResponseBodyAsString(), ex);
       throw new RestApiException(INVALID_REQUEST);
     } catch (RestClientException ex) {
-      logger.error("RestClientException occurred while fetching coordinates for address: {}",
+      log.error("RestClientException occurred while fetching coordinates for address: {}",
           address, ex);
       throw new RestApiException(EXTERNAL_API_ERROR);
     }
