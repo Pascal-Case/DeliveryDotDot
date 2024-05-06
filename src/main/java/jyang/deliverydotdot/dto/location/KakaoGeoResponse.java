@@ -1,5 +1,6 @@
 package jyang.deliverydotdot.dto.location;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,7 +24,8 @@ public class KakaoGeoResponse {
   @AllArgsConstructor
   public static class Document {
 
-    private String address_name;
+    @JsonProperty("address_name")
+    private String addressName;
     private String x;
     private String y;
 

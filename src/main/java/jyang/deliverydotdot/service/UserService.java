@@ -5,7 +5,6 @@ import static jyang.deliverydotdot.type.ErrorCode.ALREADY_REGISTERED_EMAIL;
 import static jyang.deliverydotdot.type.ErrorCode.ALREADY_REGISTERED_LOGIN_ID;
 import static jyang.deliverydotdot.type.ErrorCode.ALREADY_REGISTERED_PHONE;
 
-import java.util.logging.Logger;
 import jyang.deliverydotdot.domain.User;
 import jyang.deliverydotdot.domain.UserDeliveryAddress;
 import jyang.deliverydotdot.dto.UserJoinForm;
@@ -13,12 +12,14 @@ import jyang.deliverydotdot.exception.RestApiException;
 import jyang.deliverydotdot.repository.UserDeliveryAddressRepository;
 import jyang.deliverydotdot.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Point;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class UserService {
@@ -30,9 +31,6 @@ public class UserService {
   private final UserRepository userRepository;
 
   private final BCryptPasswordEncoder passwordEncoder;
-
-  private final Logger logger = Logger.getLogger(UserService.class.getName());
-
 
   @Transactional
   public void registerUser(UserJoinForm userJoinForm) {
@@ -66,15 +64,15 @@ public class UserService {
 
   private void validateRegisterUser(UserJoinForm userJoinForm) {
     if (userRepository.existsByLoginId(userJoinForm.getLoginId())) {
-      logger.warning("Already registered loginId: " + userJoinForm.getLoginId());
+      log.warn("Already registered loginId: " + userJoinForm.getLoginId());
       throw new RestApiException(ALREADY_REGISTERED_LOGIN_ID);
     }
     if (userRepository.existsByEmail(userJoinForm.getEmail())) {
-      logger.warning("Already registered email: " + userJoinForm.getEmail());
+      log.warn("Already registered email: " + userJoinForm.getEmail());
       throw new RestApiException(ALREADY_REGISTERED_EMAIL);
     }
     if (userRepository.existsByPhone(userJoinForm.getPhone())) {
-      logger.warning("Already registered phone: " + userJoinForm.getPhone());
+      log.warn("Already registered phone: " + userJoinForm.getPhone());
       throw new RestApiException(ALREADY_REGISTERED_PHONE);
     }
   }
