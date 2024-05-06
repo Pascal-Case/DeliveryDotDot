@@ -73,7 +73,7 @@ public class UserService {
       logger.warning("Already registered email: " + userJoinForm.getEmail());
       throw new RestApiException(ALREADY_REGISTERED_EMAIL);
     }
-    if (userRepository.existsByLoginId(userJoinForm.getPhone())) {
+    if (userRepository.existsByPhone(userJoinForm.getPhone())) {
       logger.warning("Already registered phone: " + userJoinForm.getPhone());
       throw new RestApiException(ALREADY_REGISTERED_PHONE);
     }

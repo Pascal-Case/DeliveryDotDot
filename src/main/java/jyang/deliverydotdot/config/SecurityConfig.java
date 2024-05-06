@@ -3,6 +3,7 @@ package jyang.deliverydotdot.config;
 import jyang.deliverydotdot.authentication.JwtAuthenticationFilter;
 import jyang.deliverydotdot.authentication.JwtTokenProvider;
 import jyang.deliverydotdot.authentication.UserLoginFilter;
+import jyang.deliverydotdot.service.CustomOAuth2Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,6 +27,8 @@ public class SecurityConfig {
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
   private final JwtTokenProvider jwtTokenProvider;
+
+  private final CustomOAuth2Service customOAuth2Service;
 
   @Bean
   public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration)
@@ -61,7 +64,13 @@ public class SecurityConfig {
     configureCommonSecuritySettings(http); // 공통 보안 설정 적용
 
     http
-        .securityMatchers(auth -> auth.requestMatchers("/api/v1/users/**"))
+        .securityMatchers(
+            auth -> auth.requestMatchers("/api/v1/users/**", "/oauth2/**", "/login/**"))
+
+        .oauth2Login(oauth2 -> oauth2
+            .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig
+                .userService(customOAuth2Service))
+        )
 
         .addFilterBefore(jwtAuthenticationFilter, UserLoginFilter.class) // jwt 검증 필터 추가
         .addFilterBefore(new UserLoginFilter(authenticationManager(authenticationConfiguration),

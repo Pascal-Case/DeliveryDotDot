@@ -35,7 +35,7 @@ public class LocationService {
 
   private final GeometryFactory geometryFactory;
 
-  @Value("${kakao.api.key}")
+  @Value("${spring.security.oauth2.client.registration.kakao.client-id}")
   private String apiKey;
 
   public Point getCoordinatesFromAddress(String address) {

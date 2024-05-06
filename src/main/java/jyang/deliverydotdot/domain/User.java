@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import java.time.LocalDateTime;
+import jyang.deliverydotdot.dto.oauth2.OAuth2Response;
 import jyang.deliverydotdot.type.AuthType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -53,4 +54,13 @@ public class User extends BaseEntity {
   private String provider;
 
   private String providerId;
+
+  public void updateWithOAuth2Response(OAuth2Response oAuth2Response) {
+    this.email = oAuth2Response.getEmail();
+    this.name = oAuth2Response.getName();
+    this.phone = oAuth2Response.getPhone();
+    this.authType = AuthType.OAUTH;
+    this.provider = oAuth2Response.getProvider();
+    this.providerId = oAuth2Response.getProviderId();
+  }
 }
