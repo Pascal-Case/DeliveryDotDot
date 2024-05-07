@@ -2,6 +2,7 @@ package jyang.deliverydotdot.authentication;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -26,7 +27,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
     // 헤더에서 토큰 추출
-    String token = parseBearerToken(request);
+    String token = parseBearerTokenFromHeader(request);
+
+    // 쿠키에서 토큰 추출
+    if (token == null) {
+      token = parseBearerTokenFromCookie(request);
+    }
 
     // 토큰이 유효할 때
     if (token != null && !jwtTokenProvider.isExpired(token)) {
@@ -47,10 +53,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   }
 
   // 헤더에서 Bearer 토큰 추출
-  private String parseBearerToken(HttpServletRequest request) {
+  private String parseBearerTokenFromHeader(HttpServletRequest request) {
     return Optional.ofNullable(request.getHeader(HttpHeaders.AUTHORIZATION))
         .filter(token -> token.substring(0, 7).equalsIgnoreCase("Bearer "))
         .map(token -> token.substring(7))
         .orElse(null);
+  }
+
+  // 쿠키에서 토큰 추출
+  private String parseBearerTokenFromCookie(HttpServletRequest request) {
+    Cookie[] cookies = request.getCookies();
+    if (cookies == null) {
+      return null;
+    }
+    for (Cookie cookie : cookies) {
+      if (cookie.getName().equals("Authorization")) {
+        return cookie.getValue();
+      }
+    }
+    return null;
   }
 }

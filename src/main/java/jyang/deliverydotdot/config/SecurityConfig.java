@@ -1,8 +1,10 @@
 package jyang.deliverydotdot.config;
 
+import java.util.List;
 import jyang.deliverydotdot.authentication.JwtAuthenticationFilter;
 import jyang.deliverydotdot.authentication.JwtTokenProvider;
 import jyang.deliverydotdot.authentication.UserLoginFilter;
+import jyang.deliverydotdot.oauth2.CustomSuccessHandler;
 import jyang.deliverydotdot.service.CustomOAuth2Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -16,6 +18,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
 
 @Configuration
 @EnableWebSecurity
@@ -29,6 +32,8 @@ public class SecurityConfig {
   private final JwtTokenProvider jwtTokenProvider;
 
   private final CustomOAuth2Service customOAuth2Service;
+
+  private final CustomSuccessHandler customSuccessHandler;
 
   @Bean
   public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration)
@@ -67,9 +72,22 @@ public class SecurityConfig {
         .securityMatchers(
             auth -> auth.requestMatchers("/api/v1/users/**", "/oauth2/**", "/login/**"))
 
+        .cors(corsCustomizer -> corsCustomizer.configurationSource(request -> {
+          CorsConfiguration configuration = new CorsConfiguration();
+          configuration.setAllowedOrigins(List.of("/**"));
+          configuration.setAllowedMethods(List.of("*"));
+          configuration.setAllowedHeaders(List.of("*"));
+          configuration.setExposedHeaders(List.of("Set-Cookie"));
+          configuration.setExposedHeaders(List.of("Authorization"));
+          configuration.setAllowCredentials(true);
+          configuration.setMaxAge(3600L);
+          return configuration;
+        }))
+
         .oauth2Login(oauth2 -> oauth2
             .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig
                 .userService(customOAuth2Service))
+            .successHandler(customSuccessHandler)
         )
 
         .addFilterBefore(jwtAuthenticationFilter, UserLoginFilter.class) // jwt 검증 필터 추가
@@ -121,7 +139,6 @@ public class SecurityConfig {
   private void configureCommonSecuritySettings(HttpSecurity http) throws Exception {
     http
         .csrf(AbstractHttpConfigurer::disable) // csrf 비활성화
-        .cors(AbstractHttpConfigurer::disable) // cors 비활성화
         .formLogin(AbstractHttpConfigurer::disable) // form 로그인 방식 비활성화
         .httpBasic(AbstractHttpConfigurer::disable) // http basic 인증 비활성화
         .sessionManagement(
