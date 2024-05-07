@@ -16,6 +16,11 @@ spring:
         use_sql_comments: true
         jdbc:
           time_zone: UTC
+    database-platform: org.hibernate.spatial.dialect.mysql.MySQL56InnoDBSpatialDialect
+
+  jwt:
+    secret: anlhbmdqcGFya2RpZHdvd25zcWtyd25nbWxmbHpodHBzeG1mamZxbGZlbGR0amRuZmNoc3VzdG9kamYxOTAyZmo4NGpmc2RmajA5anZ4a2NsdmJubjI0NSxtLjIzbjQ1OTh1Yjg5eGN2dWI4amtvbDI0M241bSx2OThzZDhmMAo=
+    expiration: 3600000
 
 logging:
   config: classpath:logback-spring.xml
@@ -25,3 +30,7 @@ logging:
 #      hibernate:
 #        SQL: DEBUG
 #        type: TRACE
+
+kakao:
+  api:
+    key: 4c3a33797d731925ec82252b4823a084

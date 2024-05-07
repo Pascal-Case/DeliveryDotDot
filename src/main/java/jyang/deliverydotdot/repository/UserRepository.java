@@ -1,5 +1,6 @@
 package jyang.deliverydotdot.repository;
 
+import java.util.Optional;
 import jyang.deliverydotdot.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -13,4 +14,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
   boolean existsByPhone(String phone);
 
+  Optional<User> findByLoginId(String loginId);
 }

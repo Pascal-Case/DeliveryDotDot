@@ -53,5 +53,4 @@ public class User extends BaseEntity {
   private String provider;
 
   private String providerId;
-
 }
