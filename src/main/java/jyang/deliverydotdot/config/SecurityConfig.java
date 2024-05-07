@@ -74,7 +74,7 @@ public class SecurityConfig {
 
         .cors(corsCustomizer -> corsCustomizer.configurationSource(request -> {
           CorsConfiguration configuration = new CorsConfiguration();
-          configuration.setAllowedOrigins(List.of("/**"));
+          configuration.setAllowedOrigins(List.of("*"));
           configuration.setAllowedMethods(List.of("*"));
           configuration.setAllowedHeaders(List.of("*"));
           configuration.setExposedHeaders(List.of("Set-Cookie"));
