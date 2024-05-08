@@ -54,4 +54,13 @@ public class UserController {
         SuccessResponse.of("유저를 성공적으로 생성했습니다.")
     );
   }
+
+  @Operation(summary = "유저 정보 조회", description = "유저 정보 조회")
+  @GetMapping()
+  public ResponseEntity<SuccessResponse<?>> getUserInfo(
+      Authentication authentication
+  ) {
+    String username = authentication.getName();
+    return ResponseEntity.ok(SuccessResponse.of(userService.getUserInfo(username)));
+  }
 }

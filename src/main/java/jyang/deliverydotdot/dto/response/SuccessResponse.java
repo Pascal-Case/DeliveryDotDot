@@ -32,6 +32,10 @@ public class SuccessResponse<T> {
   }
 
   public static <T> SuccessResponse<T> of(T data) {
-    return SuccessResponse.of(null, data);
+    return SuccessResponse.<T>builder()
+        .code("SUCCESS")
+        .message("")
+        .data(data)
+        .build();
   }
 }

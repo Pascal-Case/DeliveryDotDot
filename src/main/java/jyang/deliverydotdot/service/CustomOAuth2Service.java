@@ -28,8 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Slf4j
 public class CustomOAuth2Service extends DefaultOAuth2UserService {
-
-
+  
   private final UserRepository userRepository;
 
   @Override

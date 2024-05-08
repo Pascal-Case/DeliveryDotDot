@@ -1,10 +1,13 @@
 package jyang.deliverydotdot.config;
 
 import java.util.List;
-import jyang.deliverydotdot.authentication.JwtAuthenticationFilter;
-import jyang.deliverydotdot.authentication.JwtTokenProvider;
-import jyang.deliverydotdot.authentication.UserLoginFilter;
 import jyang.deliverydotdot.oauth2.CustomSuccessHandler;
+import jyang.deliverydotdot.security.CustomAccessDeniedHandler;
+import jyang.deliverydotdot.security.CustomAuthenticationEntryPoint;
+import jyang.deliverydotdot.security.JwtAuthenticationFilter;
+import jyang.deliverydotdot.security.JwtTokenProvider;
+import jyang.deliverydotdot.security.TokenExceptionFilter;
+import jyang.deliverydotdot.security.UserLoginFilter;
 import jyang.deliverydotdot.service.CustomOAuth2Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -26,8 +29,6 @@ import org.springframework.web.cors.CorsConfiguration;
 public class SecurityConfig {
 
   private final AuthenticationConfiguration authenticationConfiguration;
-
-  private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
   private final JwtTokenProvider jwtTokenProvider;
 
@@ -51,13 +52,22 @@ public class SecurityConfig {
     configureCommonSecuritySettings(http); // 공통 보안 설정 적용
 
     http
-        .securityMatchers(auth -> auth.requestMatchers("/api/v1/common/**"))
+        .securityMatchers(
+            auth -> auth
+                .requestMatchers("/api/v1/common/**")
+
+        )
         .authorizeHttpRequests(request -> request
-            .requestMatchers("/swagger-ui/*", "/v3/**").permitAll() // swagger-ui 접근 허용
             .requestMatchers("/api/v1/common/*/**").permitAll()
+            .requestMatchers("/error", "/favicon.ico", "/swagger-ui/**", "/v3/**").permitAll()
             .anyRequest().authenticated()
 
-        );
+        )
+        .exceptionHandling(exception -> exception
+            .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
+            .accessDeniedHandler(new CustomAccessDeniedHandler())
+        )
+    ;
     return http.build();
   }
 
@@ -83,14 +93,15 @@ public class SecurityConfig {
           configuration.setMaxAge(3600L);
           return configuration;
         }))
-
         .oauth2Login(oauth2 -> oauth2
             .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig
                 .userService(customOAuth2Service))
             .successHandler(customSuccessHandler)
         )
 
-        .addFilterBefore(jwtAuthenticationFilter, UserLoginFilter.class) // jwt 검증 필터 추가
+        .addFilterBefore(
+            new JwtAuthenticationFilter(jwtTokenProvider), UserLoginFilter.class) // jwt 검증 필터 추가
+        .addFilterBefore(new TokenExceptionFilter(), JwtAuthenticationFilter.class)
         .addFilterBefore(new UserLoginFilter(authenticationManager(authenticationConfiguration),
             jwtTokenProvider), UsernamePasswordAuthenticationFilter.class) // 로그인 필터 추가
 
@@ -98,7 +109,13 @@ public class SecurityConfig {
             .requestMatchers("/api/v1/users/auth/**").permitAll() // 로그인, 회원가입 허용
             .requestMatchers("/api/v1/users/my/**").hasRole("USER")
             .anyRequest().authenticated()
-        );
+        )
+
+        .exceptionHandling(exception -> exception
+            .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
+            .accessDeniedHandler(new CustomAccessDeniedHandler())
+        )
+    ;
     return http.build();
   }
 

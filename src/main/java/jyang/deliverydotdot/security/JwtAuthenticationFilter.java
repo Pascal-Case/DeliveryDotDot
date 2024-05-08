@@ -1,5 +1,7 @@
-package jyang.deliverydotdot.authentication;
+package jyang.deliverydotdot.security;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -8,17 +10,19 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Optional;
 import jyang.deliverydotdot.dto.CommonUserDetails;
+import jyang.deliverydotdot.exception.TokenException;
+import jyang.deliverydotdot.type.TokenErrorCode;
 import jyang.deliverydotdot.type.UserRole;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-@Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private final JwtTokenProvider jwtTokenProvider;
@@ -34,18 +38,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       token = parseBearerTokenFromCookie(request);
     }
 
-    // 토큰이 유효할 때
-    if (token != null && !jwtTokenProvider.isExpired(token)) {
-      String username = jwtTokenProvider.getUsername(token);
-      String role = jwtTokenProvider.getRole(token);
+    try {
+      // 토큰이 유효할 때
+      if (token != null && !jwtTokenProvider.isExpired(token)) {
+        String username = jwtTokenProvider.getUsername(token);
+        String role = jwtTokenProvider.getRole(token);
 
-      // 사용자 정보를 이용해 Authentication 객체 생성
-      CommonUserDetails user =
-          new CommonUserDetails(username, "", UserRole.valueOf(role.toUpperCase()));
+        // 사용자 정보를 이용해 Authentication 객체 생성
+        CommonUserDetails user =
+            new CommonUserDetails(username, "", UserRole.valueOf(role.toUpperCase()));
 
-      Authentication authentication =
-          new UsernamePasswordAuthenticationToken(user, token, user.getAuthorities());
-      SecurityContextHolder.getContext().setAuthentication(authentication);
+        Authentication authentication =
+            new UsernamePasswordAuthenticationToken(user, token, user.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+      }
+    } catch (ExpiredJwtException e) {
+      log.error("Token is expired");
+      throw new TokenException(TokenErrorCode.EXPIRED_TOKEN, e);
+    } catch (MalformedJwtException | SecurityException e) {
+      log.error("Token is invalid");
+      throw new TokenException(TokenErrorCode.INVALID_TOKEN, e);
+    } catch (Exception e) {
+      log.error("Unknown token");
+      throw new TokenException(TokenErrorCode.UNKNOWN_TOKEN, e);
     }
 
     // 다음 필터로 이동
