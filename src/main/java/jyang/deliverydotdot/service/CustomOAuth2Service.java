@@ -4,6 +4,7 @@ import static jyang.deliverydotdot.type.ErrorCode.ALREADY_REGISTERED_EMAIL;
 import static jyang.deliverydotdot.type.ErrorCode.ALREADY_REGISTERED_PHONE;
 
 import java.util.Map;
+import java.util.Optional;
 import jyang.deliverydotdot.domain.User;
 import jyang.deliverydotdot.dto.oauth2.CustomOAuth2User;
 import jyang.deliverydotdot.dto.oauth2.KakaoResponse;
@@ -12,7 +13,6 @@ import jyang.deliverydotdot.dto.oauth2.OAuth2Response;
 import jyang.deliverydotdot.exception.RestApiException;
 import jyang.deliverydotdot.repository.UserRepository;
 import jyang.deliverydotdot.type.AuthType;
-import jyang.deliverydotdot.type.ErrorCode;
 import jyang.deliverydotdot.type.OAuth2Type;
 import jyang.deliverydotdot.type.UserRole;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Slf4j
 public class CustomOAuth2Service extends DefaultOAuth2UserService {
-  
+
   private final UserRepository userRepository;
 
   @Override
@@ -42,35 +42,33 @@ public class CustomOAuth2Service extends DefaultOAuth2UserService {
 
     CustomOAuth2User customOAuth2User = new CustomOAuth2User(oAuth2Response, UserRole.ROLE_USER);
 
-    boolean isRegisteredUser = userRepository.existsByLoginId(customOAuth2User.getUsername());
+    Optional<User> optionalUser = userRepository.findByLoginId(customOAuth2User.getUsername());
 
-    if (isRegisteredUser) {
+    if (optionalUser.isPresent()) {
       // 이미 등록된 사용자인 경우
-      User user = userRepository.findByLoginId(customOAuth2User.getUsername())
-          .orElseThrow(() -> new RestApiException(ErrorCode.USER_NOT_FOUND));
+      User user = optionalUser.get();
 
       // 등록하고자 하는 이메일이 이미 존재하는 경우
-      userRepository.findByEmail(customOAuth2User.getEmail())
-          .ifPresent(
-              existingUser -> {
-                if (!existingUser.getLoginId().equals(user.getLoginId())) {
-                  log.warn("Already registered email: " + customOAuth2User.getEmail());
-                  throw new RestApiException(ALREADY_REGISTERED_EMAIL);
-                }
-              });
+      User existingUserByEmail = userRepository.findByEmail(customOAuth2User.getEmail())
+          .filter(existingUser -> !existingUser.getLoginId().equals(user.getLoginId()))
+          .orElse(null);
+
+      if (existingUserByEmail != null) {
+        log.warn("Already registered email: " + customOAuth2User.getEmail());
+        throw new RestApiException(ALREADY_REGISTERED_EMAIL);
+      }
 
       // 등록하고자 하는 전화번호가 이미 존재하는 경우
-      userRepository.findByPhone(customOAuth2User.getPhone())
-          .ifPresent(
-              existingUser -> {
-                if (!existingUser.getLoginId().equals(user.getLoginId())) {
-                  log.warn("Already registered phone: " + customOAuth2User.getPhone());
-                  throw new RestApiException(ALREADY_REGISTERED_PHONE);
-                }
-              });
+      User existingUserByPhone = userRepository.findByPhone(customOAuth2User.getPhone())
+          .filter(existingUser -> !existingUser.getLoginId().equals(user.getLoginId()))
+          .orElse(null);
+
+      if (existingUserByPhone != null) {
+        log.warn("Already registered phone: " + customOAuth2User.getPhone());
+        throw new RestApiException(ALREADY_REGISTERED_PHONE);
+      }
 
       user.updateWithOAuth2Response(oAuth2Response);
-
     } else {
       // 새로운 사용자인 경우
       if (userRepository.existsByEmail(customOAuth2User.getEmail())) {

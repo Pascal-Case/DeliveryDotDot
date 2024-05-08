@@ -8,6 +8,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Optional;
 import jyang.deliverydotdot.dto.CommonUserDetails;
 import jyang.deliverydotdot.exception.TokenException;
@@ -81,11 +82,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     if (cookies == null) {
       return null;
     }
-    for (Cookie cookie : cookies) {
-      if (cookie.getName().equals("Authorization")) {
-        return cookie.getValue();
-      }
-    }
-    return null;
+
+    return Arrays.stream(cookies)
+        .filter(cookie -> cookie.getName().equals("Authorization"))
+        .findFirst().map(Cookie::getValue)
+        .orElse(null);
   }
 }
