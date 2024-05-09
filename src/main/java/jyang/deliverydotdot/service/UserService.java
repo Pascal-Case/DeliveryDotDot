@@ -8,8 +8,8 @@ import static jyang.deliverydotdot.type.ErrorCode.USER_NOT_FOUND;
 
 import jyang.deliverydotdot.domain.User;
 import jyang.deliverydotdot.domain.UserDeliveryAddress;
-import jyang.deliverydotdot.dto.UserInfo;
-import jyang.deliverydotdot.dto.UserJoinForm;
+import jyang.deliverydotdot.dto.user.UserInfo;
+import jyang.deliverydotdot.dto.user.UserJoinForm;
 import jyang.deliverydotdot.exception.RestApiException;
 import jyang.deliverydotdot.repository.UserDeliveryAddressRepository;
 import jyang.deliverydotdot.repository.UserRepository;

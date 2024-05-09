@@ -12,7 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import jyang.deliverydotdot.domain.User;
-import jyang.deliverydotdot.dto.UserJoinForm;
+import jyang.deliverydotdot.dto.user.UserJoinForm;
 import jyang.deliverydotdot.exception.RestApiException;
 import jyang.deliverydotdot.repository.UserDeliveryAddressRepository;
 import jyang.deliverydotdot.repository.UserRepository;

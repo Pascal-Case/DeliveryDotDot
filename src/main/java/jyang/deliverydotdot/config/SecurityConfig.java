@@ -49,7 +49,8 @@ public class SecurityConfig {
 
   @Bean
   public SecurityFilterChain commonFilterChain(HttpSecurity http) throws Exception {
-    configureCommonSecuritySettings(http); // 공통 보안 설정 적용
+    http = configureCommonSecuritySettings(http); // 공통 보안 설정 적용
+    http = commonCorsConfig(http);
 
     http
         .securityMatchers(
@@ -76,23 +77,12 @@ public class SecurityConfig {
    */
   @Bean
   public SecurityFilterChain userSecurityFilterChain(HttpSecurity http) throws Exception {
-    configureCommonSecuritySettings(http); // 공통 보안 설정 적용
-
+    http = configureCommonSecuritySettings(http); // 공통 보안 설정 적용
+    http = commonCorsConfig(http);
     http
         .securityMatchers(
             auth -> auth.requestMatchers("/api/v1/users/**", "/oauth2/**", "/login/**"))
 
-        .cors(corsCustomizer -> corsCustomizer.configurationSource(request -> {
-          CorsConfiguration configuration = new CorsConfiguration();
-          configuration.setAllowedOrigins(List.of("*"));
-          configuration.setAllowedMethods(List.of("*"));
-          configuration.setAllowedHeaders(List.of("*"));
-          configuration.setExposedHeaders(List.of("Set-Cookie"));
-          configuration.setExposedHeaders(List.of("Authorization"));
-          configuration.setAllowCredentials(true);
-          configuration.setMaxAge(3600L);
-          return configuration;
-        }))
         .oauth2Login(oauth2 -> oauth2
             .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig
                 .userService(customOAuth2Service))
@@ -124,7 +114,8 @@ public class SecurityConfig {
    */
   @Bean
   public SecurityFilterChain partnerSecurityFilterChain(HttpSecurity http) throws Exception {
-    configureCommonSecuritySettings(http); // 공통 보안 설정 적용
+    http = configureCommonSecuritySettings(http); // 공통 보안 설정 적용
+    http = commonCorsConfig(http);
 
     http
         .securityMatchers(auth -> auth.requestMatchers("/api/v1/partners/**"))
@@ -141,7 +132,8 @@ public class SecurityConfig {
    */
   @Bean
   public SecurityFilterChain riderSecurityFilterChain(HttpSecurity http) throws Exception {
-    configureCommonSecuritySettings(http); // 공통 보안 설정 적용
+    http = configureCommonSecuritySettings(http); // 공통 보안 설정 적용
+    http = commonCorsConfig(http);
 
     http
         .securityMatchers(auth -> auth.requestMatchers("/api/v1/riders/**"))
@@ -153,14 +145,29 @@ public class SecurityConfig {
   }
 
   // 공통 보안 설정
-  private void configureCommonSecuritySettings(HttpSecurity http) throws Exception {
-    http
+  private HttpSecurity configureCommonSecuritySettings(HttpSecurity http) throws Exception {
+    return http
         .csrf(AbstractHttpConfigurer::disable) // csrf 비활성화
         .formLogin(AbstractHttpConfigurer::disable) // form 로그인 방식 비활성화
         .httpBasic(AbstractHttpConfigurer::disable) // http basic 인증 비활성화
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 비활성화
-    ;
+        ;
+  }
 
+  // 공통 CORS 설정
+  public HttpSecurity commonCorsConfig(HttpSecurity http) throws Exception {
+    return http
+        .cors(corsCustomizer -> corsCustomizer.configurationSource(request -> {
+          CorsConfiguration configuration = new CorsConfiguration();
+          configuration.setAllowedOrigins(List.of("*"));
+          configuration.setAllowedMethods(List.of("*"));
+          configuration.setAllowedHeaders(List.of("*"));
+          configuration.setExposedHeaders(List.of("Set-Cookie"));
+          configuration.setExposedHeaders(List.of("Authorization"));
+          configuration.setAllowCredentials(true);
+          configuration.setMaxAge(3600L);
+          return configuration;
+        }));
   }
 }

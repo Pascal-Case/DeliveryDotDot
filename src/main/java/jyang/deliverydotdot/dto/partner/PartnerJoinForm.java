@@ -1,4 +1,4 @@
-package jyang.deliverydotdot.dto;
+package jyang.deliverydotdot.dto.partner;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
@@ -18,7 +18,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @Builder
 @ToString
-public class UserJoinForm {
+public class PartnerJoinForm {
 
   @Schema(description = "로그인 아이디", minLength = 8, maxLength = 20, example = "loginId123")
   @NotBlank(message = "아이디를 입력해 주세요.")

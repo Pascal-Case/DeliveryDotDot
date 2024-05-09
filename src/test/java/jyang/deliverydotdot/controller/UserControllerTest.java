@@ -10,7 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jyang.deliverydotdot.dto.UserJoinForm;
+import jyang.deliverydotdot.dto.user.UserJoinForm;
 import jyang.deliverydotdot.exception.RestApiException;
 import jyang.deliverydotdot.security.JwtTokenProvider;
 import jyang.deliverydotdot.service.UserService;
