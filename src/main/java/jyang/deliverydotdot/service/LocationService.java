@@ -8,7 +8,6 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import jyang.deliverydotdot.dto.location.KakaoGeoResponse;
 import jyang.deliverydotdot.exception.RestApiException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -25,7 +24,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class LocationService {
 
@@ -33,8 +31,17 @@ public class LocationService {
 
   private final GeometryFactory geometryFactory;
 
-  @Value("${kakao.api.key}")
-  private String apiKey;
+  //  @Value("${spring.security.oauth2.client.registration.kakao.client-id}")
+  private final String apiKey;
+
+  public LocationService(
+      RestTemplate restTemplate,
+      GeometryFactory geometryFactory,
+      @Value("${spring.security.oauth2.client.registration.kakao.client-id}") String apiKey) {
+    this.restTemplate = restTemplate;
+    this.geometryFactory = geometryFactory;
+    this.apiKey = apiKey;
+  }
 
   public Point getCoordinatesFromAddress(String address) {
     URI uri = UriComponentsBuilder

@@ -4,9 +4,11 @@ import static jyang.deliverydotdot.type.AuthType.LOCAL;
 import static jyang.deliverydotdot.type.ErrorCode.ALREADY_REGISTERED_EMAIL;
 import static jyang.deliverydotdot.type.ErrorCode.ALREADY_REGISTERED_LOGIN_ID;
 import static jyang.deliverydotdot.type.ErrorCode.ALREADY_REGISTERED_PHONE;
+import static jyang.deliverydotdot.type.ErrorCode.USER_NOT_FOUND;
 
 import jyang.deliverydotdot.domain.User;
 import jyang.deliverydotdot.domain.UserDeliveryAddress;
+import jyang.deliverydotdot.dto.UserInfo;
 import jyang.deliverydotdot.dto.UserJoinForm;
 import jyang.deliverydotdot.exception.RestApiException;
 import jyang.deliverydotdot.repository.UserDeliveryAddressRepository;
@@ -71,10 +73,16 @@ public class UserService {
       log.warn("Already registered email: " + userJoinForm.getEmail());
       throw new RestApiException(ALREADY_REGISTERED_EMAIL);
     }
-    if (userRepository.existsByLoginId(userJoinForm.getPhone())) {
+    if (userRepository.existsByPhone(userJoinForm.getPhone())) {
       log.warn("Already registered phone: " + userJoinForm.getPhone());
       throw new RestApiException(ALREADY_REGISTERED_PHONE);
     }
   }
 
+  public UserInfo getUserInfo(String username) {
+    User user = userRepository.findByLoginId(username)
+        .orElseThrow(() -> new RestApiException(USER_NOT_FOUND));
+
+    return UserInfo.fromUser(user);
+  }
 }

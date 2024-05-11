@@ -5,11 +5,13 @@ import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import org.springframework.validation.FieldError;
 
 @Getter
 @Builder
 @RequiredArgsConstructor
+@ToString
 public class ErrorResponse {
 
   private final String code;

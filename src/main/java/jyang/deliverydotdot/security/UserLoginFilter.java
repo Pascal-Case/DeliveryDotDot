@@ -1,4 +1,4 @@
-package jyang.deliverydotdot.authentication;
+package jyang.deliverydotdot.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

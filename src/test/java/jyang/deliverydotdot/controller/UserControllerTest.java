@@ -2,6 +2,7 @@ package jyang.deliverydotdot.controller;
 
 import static jyang.deliverydotdot.type.ErrorCode.NO_COORDINATES_FOUND_FOR_ADDRESS;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -9,25 +10,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jyang.deliverydotdot.authentication.JwtTokenProvider;
-import jyang.deliverydotdot.config.SecurityConfig;
 import jyang.deliverydotdot.dto.UserJoinForm;
 import jyang.deliverydotdot.exception.RestApiException;
+import jyang.deliverydotdot.security.JwtTokenProvider;
 import jyang.deliverydotdot.service.UserService;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(controllers = UserController.class, includeFilters = {
-    @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SecurityConfig.class)
-})
+@SpringBootTest
+@AutoConfigureMockMvc
 class UserControllerTest {
 
   @Autowired
@@ -44,9 +42,13 @@ class UserControllerTest {
 
   private static final String USER_API_URL = "/api/v1/users/";
 
+  private String token;
+
   @BeforeEach
   public void setup() {
+    token = "Bearer token";
 
+    given(jwtTokenProvider.getUsername("token")).willReturn(token);
   }
 
   @Test

@@ -1,4 +1,4 @@
-package jyang.deliverydotdot.authentication;
+package jyang.deliverydotdot.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

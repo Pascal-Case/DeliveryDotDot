@@ -1,8 +1,14 @@
 package jyang.deliverydotdot.config;
 
-import jyang.deliverydotdot.authentication.JwtAuthenticationFilter;
-import jyang.deliverydotdot.authentication.JwtTokenProvider;
-import jyang.deliverydotdot.authentication.UserLoginFilter;
+import java.util.List;
+import jyang.deliverydotdot.oauth2.CustomSuccessHandler;
+import jyang.deliverydotdot.security.CustomAccessDeniedHandler;
+import jyang.deliverydotdot.security.CustomAuthenticationEntryPoint;
+import jyang.deliverydotdot.security.JwtAuthenticationFilter;
+import jyang.deliverydotdot.security.JwtTokenProvider;
+import jyang.deliverydotdot.security.TokenExceptionFilter;
+import jyang.deliverydotdot.security.UserLoginFilter;
+import jyang.deliverydotdot.service.CustomOAuth2Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +21,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
 
 @Configuration
 @EnableWebSecurity
@@ -23,9 +30,11 @@ public class SecurityConfig {
 
   private final AuthenticationConfiguration authenticationConfiguration;
 
-  private final JwtAuthenticationFilter jwtAuthenticationFilter;
-
   private final JwtTokenProvider jwtTokenProvider;
+
+  private final CustomOAuth2Service customOAuth2Service;
+
+  private final CustomSuccessHandler customSuccessHandler;
 
   @Bean
   public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration)
@@ -43,13 +52,22 @@ public class SecurityConfig {
     configureCommonSecuritySettings(http); // 공통 보안 설정 적용
 
     http
-        .securityMatchers(auth -> auth.requestMatchers("/api/v1/common/**"))
+        .securityMatchers(
+            auth -> auth
+                .requestMatchers("/api/v1/common/**")
+
+        )
         .authorizeHttpRequests(request -> request
-            .requestMatchers("/swagger-ui/*", "/v3/**").permitAll() // swagger-ui 접근 허용
             .requestMatchers("/api/v1/common/*/**").permitAll()
+            .requestMatchers("/error", "/favicon.ico", "/swagger-ui/**", "/v3/**").permitAll()
             .anyRequest().authenticated()
 
-        );
+        )
+        .exceptionHandling(exception -> exception
+            .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
+            .accessDeniedHandler(new CustomAccessDeniedHandler())
+        )
+    ;
     return http.build();
   }
 
@@ -61,9 +79,29 @@ public class SecurityConfig {
     configureCommonSecuritySettings(http); // 공통 보안 설정 적용
 
     http
-        .securityMatchers(auth -> auth.requestMatchers("/api/v1/users/**"))
+        .securityMatchers(
+            auth -> auth.requestMatchers("/api/v1/users/**", "/oauth2/**", "/login/**"))
 
-        .addFilterBefore(jwtAuthenticationFilter, UserLoginFilter.class) // jwt 검증 필터 추가
+        .cors(corsCustomizer -> corsCustomizer.configurationSource(request -> {
+          CorsConfiguration configuration = new CorsConfiguration();
+          configuration.setAllowedOrigins(List.of("*"));
+          configuration.setAllowedMethods(List.of("*"));
+          configuration.setAllowedHeaders(List.of("*"));
+          configuration.setExposedHeaders(List.of("Set-Cookie"));
+          configuration.setExposedHeaders(List.of("Authorization"));
+          configuration.setAllowCredentials(true);
+          configuration.setMaxAge(3600L);
+          return configuration;
+        }))
+        .oauth2Login(oauth2 -> oauth2
+            .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig
+                .userService(customOAuth2Service))
+            .successHandler(customSuccessHandler)
+        )
+
+        .addFilterBefore(
+            new JwtAuthenticationFilter(jwtTokenProvider), UserLoginFilter.class) // jwt 검증 필터 추가
+        .addFilterBefore(new TokenExceptionFilter(), JwtAuthenticationFilter.class)
         .addFilterBefore(new UserLoginFilter(authenticationManager(authenticationConfiguration),
             jwtTokenProvider), UsernamePasswordAuthenticationFilter.class) // 로그인 필터 추가
 
@@ -71,7 +109,13 @@ public class SecurityConfig {
             .requestMatchers("/api/v1/users/auth/**").permitAll() // 로그인, 회원가입 허용
             .requestMatchers("/api/v1/users/my/**").hasRole("USER")
             .anyRequest().authenticated()
-        );
+        )
+
+        .exceptionHandling(exception -> exception
+            .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
+            .accessDeniedHandler(new CustomAccessDeniedHandler())
+        )
+    ;
     return http.build();
   }
 
@@ -112,7 +156,6 @@ public class SecurityConfig {
   private void configureCommonSecuritySettings(HttpSecurity http) throws Exception {
     http
         .csrf(AbstractHttpConfigurer::disable) // csrf 비활성화
-        .cors(AbstractHttpConfigurer::disable) // cors 비활성화
         .formLogin(AbstractHttpConfigurer::disable) // form 로그인 방식 비활성화
         .httpBasic(AbstractHttpConfigurer::disable) // http basic 인증 비활성화
         .sessionManagement(
