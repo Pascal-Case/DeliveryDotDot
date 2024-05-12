@@ -4,6 +4,8 @@ import static jyang.deliverydotdot.type.UserRole.ROLE_USER;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import jyang.deliverydotdot.domain.Partner;
+import jyang.deliverydotdot.domain.Rider;
 import jyang.deliverydotdot.domain.User;
 import jyang.deliverydotdot.type.UserRole;
 import lombok.AllArgsConstructor;
@@ -68,5 +70,20 @@ public class CommonUserDetails implements UserDetails {
         .userRole(ROLE_USER)
         .build();
   }
-  
+
+  public static CommonUserDetails fromPartner(Partner partner) {
+    return CommonUserDetails.builder()
+        .username(partner.getLoginId())
+        .password(partner.getPassword())
+        .userRole(UserRole.ROLE_PARTNER)
+        .build();
+  }
+
+  public static CommonUserDetails fromRider(Rider rider) {
+    return CommonUserDetails.builder()
+        .username(rider.getLoginId())
+        .password(rider.getPassword())
+        .userRole(UserRole.ROLE_RIDER)
+        .build();
+  }
 }

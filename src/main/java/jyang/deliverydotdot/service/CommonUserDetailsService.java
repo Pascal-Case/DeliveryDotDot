@@ -1,6 +1,8 @@
 package jyang.deliverydotdot.service;
 
 import jyang.deliverydotdot.dto.CommonUserDetails;
+import jyang.deliverydotdot.repository.PartnerRepository;
+import jyang.deliverydotdot.repository.RiderRepository;
 import jyang.deliverydotdot.repository.UserRepository;
 import jyang.deliverydotdot.type.UserRole;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,10 @@ import org.springframework.stereotype.Service;
 public class CommonUserDetailsService implements UserDetailsService {
 
   private final UserRepository userRepository;
+
+  private final PartnerRepository partnerRepository;
+
+  private final RiderRepository riderRepository;
 
   @Override
   public UserDetails loadUserByUsername(String identifier) throws UsernameNotFoundException {
@@ -33,9 +39,13 @@ public class CommonUserDetailsService implements UserDetailsService {
           .map(CommonUserDetails::fromUser)
           .orElseThrow(() -> new UsernameNotFoundException("User not found for ID: " + loginId));
 
-      case ROLE_PARTNER -> null; // TODO: 파트너 로직 추가
+      case ROLE_PARTNER -> partnerRepository.findByLoginId(loginId)
+          .map(CommonUserDetails::fromPartner)
+          .orElseThrow(() -> new UsernameNotFoundException("Partner not found for ID: " + loginId));
 
-      case ROLE_RIDER -> null; // TODO: 라이더 로직 추가
+      case ROLE_RIDER -> riderRepository.findByLoginId(loginId)
+          .map(CommonUserDetails::fromRider)
+          .orElseThrow(() -> new UsernameNotFoundException("Rider not found for ID: " + loginId));
     };
 
   }

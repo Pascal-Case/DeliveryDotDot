@@ -6,6 +6,8 @@ import jyang.deliverydotdot.security.CustomAccessDeniedHandler;
 import jyang.deliverydotdot.security.CustomAuthenticationEntryPoint;
 import jyang.deliverydotdot.security.JwtAuthenticationFilter;
 import jyang.deliverydotdot.security.JwtTokenProvider;
+import jyang.deliverydotdot.security.PartnerLoginFilter;
+import jyang.deliverydotdot.security.RiderLoginFilter;
 import jyang.deliverydotdot.security.TokenExceptionFilter;
 import jyang.deliverydotdot.security.UserLoginFilter;
 import jyang.deliverydotdot.service.CustomOAuth2Service;
@@ -59,7 +61,7 @@ public class SecurityConfig {
 
         )
         .authorizeHttpRequests(request -> request
-            .requestMatchers("/api/v1/common/*/**").permitAll()
+            .requestMatchers("/api/v1/common/**").permitAll()
             .requestMatchers("/error", "/favicon.ico", "/swagger-ui/**", "/v3/**").permitAll()
             .anyRequest().authenticated()
 
@@ -97,7 +99,7 @@ public class SecurityConfig {
 
         .authorizeHttpRequests(request -> request
             .requestMatchers("/api/v1/users/auth/**").permitAll() // 로그인, 회원가입 허용
-            .requestMatchers("/api/v1/users/my/**").hasRole("USER")
+            .requestMatchers("/api/v1/users/").hasRole("USER")
             .anyRequest().authenticated()
         )
 
@@ -119,6 +121,13 @@ public class SecurityConfig {
 
     http
         .securityMatchers(auth -> auth.requestMatchers("/api/v1/partners/**"))
+
+        // JWT authentication filter -> PartnerLoginFilter -> UsernamePasswordAuthenticationFilter 순서로 필터 적용
+        .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
+            PartnerLoginFilter.class)
+        .addFilterBefore(new PartnerLoginFilter(authenticationManager(authenticationConfiguration),
+            jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
+
         .authorizeHttpRequests(request -> request
             .requestMatchers("/api/v1/partners/auth/**").permitAll()
             .anyRequest().authenticated()
@@ -137,6 +146,13 @@ public class SecurityConfig {
 
     http
         .securityMatchers(auth -> auth.requestMatchers("/api/v1/riders/**"))
+
+        // JWT authentication filter -> RiderLoginFilter -> UsernamePasswordAuthenticationFilter 순서로 필터 적용
+        .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
+            RiderLoginFilter.class)
+        .addFilterBefore(new RiderLoginFilter(authenticationManager(authenticationConfiguration),
+            jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
+
         .authorizeHttpRequests(request -> request
             .requestMatchers("/api/v1/riders/auth/**").permitAll()
             .anyRequest().authenticated()
