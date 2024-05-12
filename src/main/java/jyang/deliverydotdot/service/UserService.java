@@ -10,6 +10,7 @@ import jyang.deliverydotdot.domain.User;
 import jyang.deliverydotdot.domain.UserDeliveryAddress;
 import jyang.deliverydotdot.dto.user.UserInfo;
 import jyang.deliverydotdot.dto.user.UserJoinForm;
+import jyang.deliverydotdot.dto.user.UserUpdateForm;
 import jyang.deliverydotdot.exception.RestApiException;
 import jyang.deliverydotdot.repository.UserDeliveryAddressRepository;
 import jyang.deliverydotdot.repository.UserRepository;
@@ -64,25 +65,71 @@ public class UserService {
     userDeliveryAddressRepository.save(deliveryAddress);
   }
 
-  private void validateRegisterUser(UserJoinForm userJoinForm) {
-    if (userRepository.existsByLoginId(userJoinForm.getLoginId())) {
-      log.warn("Already registered loginId: " + userJoinForm.getLoginId());
-      throw new RestApiException(ALREADY_REGISTERED_LOGIN_ID);
-    }
-    if (userRepository.existsByEmail(userJoinForm.getEmail())) {
-      log.warn("Already registered email: " + userJoinForm.getEmail());
-      throw new RestApiException(ALREADY_REGISTERED_EMAIL);
-    }
-    if (userRepository.existsByPhone(userJoinForm.getPhone())) {
-      log.warn("Already registered phone: " + userJoinForm.getPhone());
-      throw new RestApiException(ALREADY_REGISTERED_PHONE);
-    }
-  }
-
   public UserInfo getUserInfo(String username) {
     User user = userRepository.findByLoginId(username)
         .orElseThrow(() -> new RestApiException(USER_NOT_FOUND));
 
     return UserInfo.fromUser(user);
+  }
+
+  @Transactional
+  public void deleteByLoginId(String loginId) {
+    User user = userRepository.findByLoginId(loginId)
+        .orElseThrow(() -> new RestApiException(USER_NOT_FOUND));
+
+    userRepository.delete(user);
+  }
+
+  @Transactional
+  public void updateUserInfo(String username, UserUpdateForm updateForm) {
+    User user = userRepository.findByLoginId(username)
+        .orElseThrow(() -> new RestApiException(USER_NOT_FOUND));
+
+    if (!user.getEmail().equals(updateForm.getEmail())) {
+      if (existsByEmail(updateForm.getEmail())) {
+        log.warn("Already registered email: " + updateForm.getEmail());
+        throw new RestApiException(ALREADY_REGISTERED_EMAIL);
+      }
+    }
+
+    if (!user.getPhone().equals(updateForm.getPhone())) {
+      if (existsByPhone(updateForm.getPhone())) {
+        log.warn("Already registered phone: " + updateForm.getPhone());
+        throw new RestApiException(ALREADY_REGISTERED_PHONE);
+      }
+    }
+
+    if (updateForm.getPassword() != null) {
+      updateForm.encodePassword(passwordEncoder.encode(updateForm.getPassword()));
+    }
+
+    user.update(updateForm);
+  }
+
+  private void validateRegisterUser(UserJoinForm userJoinForm) {
+    if (existsByLoginId(userJoinForm.getLoginId())) {
+      log.warn("Already registered loginId: " + userJoinForm.getLoginId());
+      throw new RestApiException(ALREADY_REGISTERED_LOGIN_ID);
+    }
+    if (existsByEmail(userJoinForm.getEmail())) {
+      log.warn("Already registered email: " + userJoinForm.getEmail());
+      throw new RestApiException(ALREADY_REGISTERED_EMAIL);
+    }
+    if (existsByPhone(userJoinForm.getPhone())) {
+      log.warn("Already registered phone: " + userJoinForm.getPhone());
+      throw new RestApiException(ALREADY_REGISTERED_PHONE);
+    }
+  }
+
+  private boolean existsByLoginId(String loginId) {
+    return userRepository.existsByLoginId(loginId);
+  }
+
+  private boolean existsByEmail(String email) {
+    return userRepository.existsByEmail(email);
+  }
+
+  private boolean existsByPhone(String phone) {
+    return userRepository.existsByPhone(phone);
   }
 }

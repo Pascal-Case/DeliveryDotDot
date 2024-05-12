@@ -11,11 +11,14 @@ import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import java.time.LocalDateTime;
 import jyang.deliverydotdot.dto.oauth2.OAuth2Response;
+import jyang.deliverydotdot.dto.user.UserUpdateForm;
 import jyang.deliverydotdot.type.AuthType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Getter
@@ -23,6 +26,8 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @SuperBuilder
 @Inheritance(strategy = InheritanceType.JOINED)
+@SQLDelete(sql = "UPDATE user SET deleted_at = now() WHERE user_id = ?")
+@SQLRestriction("deleted_at is null")
 public class User extends BaseEntity {
 
   @Id
@@ -62,5 +67,14 @@ public class User extends BaseEntity {
     this.authType = AuthType.OAUTH;
     this.provider = oAuth2Response.getProvider();
     this.providerId = oAuth2Response.getProviderId();
+  }
+
+  public void update(UserUpdateForm updateForm) {
+    if (updateForm.getPassword() != null) {
+      this.password = updateForm.getPassword();
+    }
+    this.email = updateForm.getEmail();
+    this.phone = updateForm.getPhone();
+    this.address = updateForm.getAddress();
   }
 }
