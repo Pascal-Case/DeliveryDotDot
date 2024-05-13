@@ -10,11 +10,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import java.time.LocalDateTime;
+import jyang.deliverydotdot.dto.rider.RiderUpdateForm;
 import jyang.deliverydotdot.type.DeliveryMethod;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Getter
@@ -22,6 +25,8 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @SuperBuilder
 @Inheritance(strategy = InheritanceType.JOINED)
+@SQLDelete(sql = "UPDATE partner SET deleted_at = now() WHERE partner_id = ?")
+@SQLRestriction("deleted_at is null")
 public class Rider extends BaseEntity {
 
   @Id
@@ -51,4 +56,14 @@ public class Rider extends BaseEntity {
 
   private LocalDateTime deletedAt;
 
+  public void update(RiderUpdateForm updateForm) {
+    if (updateForm.getPassword() != null) {
+      this.password = updateForm.getPassword();
+    }
+    this.email = updateForm.getEmail();
+    this.phone = updateForm.getPhone();
+    this.address = updateForm.getAddress();
+    this.deliveryMethod = DeliveryMethod.valueOf(updateForm.getDeliveryMethod());
+    this.deliveryRegion = updateForm.getDeliveryRegion();
+  }
 }
