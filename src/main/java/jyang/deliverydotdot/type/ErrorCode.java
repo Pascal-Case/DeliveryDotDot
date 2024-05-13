@@ -19,8 +19,9 @@ public enum ErrorCode {
   ALREADY_REGISTERED_PHONE(HttpStatus.BAD_REQUEST, "이미 등록된 휴대전화 번호 입니다."),
   NO_COORDINATES_FOUND_FOR_ADDRESS(HttpStatus.UNPROCESSABLE_ENTITY, "주소에 대한 좌표를 찾을 수 없습니다."),
   USER_NOT_FOUND(HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다."),
-  INVALID_DELIVERY_METHOD(HttpStatus.BAD_REQUEST, "유효하지 않은 배달 방법입니다.");
-  
+  INVALID_DELIVERY_METHOD(HttpStatus.BAD_REQUEST, "유효하지 않은 배달 방법입니다."),
+  PARTNER_NOT_FOUND(HttpStatus.NOT_FOUND, "파트너를 찾을 수 없습니다."),
+  RIDER_NOT_FOUND(HttpStatus.NOT_FOUND, "라이더를 찾을 수 없습니다.");
   private final HttpStatus httpStatus;
   private final String description;
 }
