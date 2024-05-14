@@ -101,8 +101,6 @@ public class RiderService {
   public void deleteByLoginId(String loginId) {
     Rider rider = getRiderByLoginId(loginId);
 
-    System.out.println(rider.getLoginId());
-
     riderRepository.delete(rider);
   }
 
