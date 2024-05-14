@@ -4,6 +4,11 @@ spring:
     username: delivery_user
     password: pwd123
     driver-class-name: com.mysql.cj.jdbc.Driver
+  data:
+    redis:
+      host: 43.203.69.35
+      port: 6379
+      password: pwd123
   jpa:
     defer-datasource-initialization: true
     hibernate:
