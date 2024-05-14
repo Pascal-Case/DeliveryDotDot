@@ -9,6 +9,7 @@ import java.util.Collection;
 import jyang.deliverydotdot.dto.oauth2.CustomOAuth2User;
 import jyang.deliverydotdot.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -19,6 +20,9 @@ import org.springframework.stereotype.Component;
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
   private final JwtTokenProvider jwtTokenProvider;
+
+  @Value("${spring.security.oauth2.success.redirect-uri}")
+  private String redirectUri;
 
   @Override
   public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -36,7 +40,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     String token = jwtTokenProvider.createToken(username, role);
 
     response.addCookie(createCookie("Authorization", token));
-    response.sendRedirect("http://localhost:8080/api/v1/users/my");
+    response.sendRedirect(redirectUri);
   }
 
   private Cookie createCookie(String key, String value) {

@@ -1,4 +1,4 @@
-package jyang.deliverydotdot.dto;
+package jyang.deliverydotdot.dto.user;
 
 import jyang.deliverydotdot.domain.User;
 import jyang.deliverydotdot.type.AuthType;

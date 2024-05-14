@@ -10,9 +10,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import java.time.LocalDateTime;
-import jyang.deliverydotdot.dto.oauth2.OAuth2Response;
-import jyang.deliverydotdot.dto.user.UserUpdateForm;
-import jyang.deliverydotdot.type.AuthType;
+import jyang.deliverydotdot.dto.rider.RiderUpdateForm;
+import jyang.deliverydotdot.type.DeliveryMethod;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,13 +25,13 @@ import org.hibernate.annotations.SQLRestriction;
 @AllArgsConstructor
 @SuperBuilder
 @Inheritance(strategy = InheritanceType.JOINED)
-@SQLDelete(sql = "UPDATE user SET deleted_at = now() WHERE user_id = ?")
+@SQLDelete(sql = "UPDATE rider SET deleted_at = now() WHERE rider_id = ?")
 @SQLRestriction("deleted_at is null")
-public class User extends BaseEntity {
+public class Rider extends BaseEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long userId;
+  private Long riderId;
 
   @Column(unique = true, nullable = false)
   private String loginId;
@@ -50,31 +49,21 @@ public class User extends BaseEntity {
 
   private String address;
 
+  @Enumerated(EnumType.STRING)
+  private DeliveryMethod deliveryMethod;
+
+  private String deliveryRegion;
+
   private LocalDateTime deletedAt;
 
-  @Enumerated(EnumType.STRING)
-  @Column(nullable = false)
-  private AuthType authType;
-
-  private String provider;
-
-  private String providerId;
-
-  public void updateWithOAuth2Response(OAuth2Response oAuth2Response) {
-    this.email = oAuth2Response.getEmail();
-    this.name = oAuth2Response.getName();
-    this.phone = oAuth2Response.getPhone();
-    this.authType = AuthType.OAUTH;
-    this.provider = oAuth2Response.getProvider();
-    this.providerId = oAuth2Response.getProviderId();
-  }
-
-  public void update(UserUpdateForm updateForm) {
+  public void update(RiderUpdateForm updateForm) {
     if (updateForm.getPassword() != null) {
       this.password = updateForm.getPassword();
     }
     this.email = updateForm.getEmail();
     this.phone = updateForm.getPhone();
     this.address = updateForm.getAddress();
+    this.deliveryMethod = DeliveryMethod.valueOf(updateForm.getDeliveryMethod());
+    this.deliveryRegion = updateForm.getDeliveryRegion();
   }
 }
