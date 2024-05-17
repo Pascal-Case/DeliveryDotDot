@@ -21,7 +21,11 @@ public enum ErrorCode {
   USER_NOT_FOUND(HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다."),
   INVALID_DELIVERY_METHOD(HttpStatus.BAD_REQUEST, "유효하지 않은 배달 방법입니다."),
   PARTNER_NOT_FOUND(HttpStatus.NOT_FOUND, "파트너를 찾을 수 없습니다."),
-  RIDER_NOT_FOUND(HttpStatus.NOT_FOUND, "라이더를 찾을 수 없습니다.");
+  RIDER_NOT_FOUND(HttpStatus.NOT_FOUND, "라이더를 찾을 수 없습니다."),
+  FILE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드에 실패했습니다."),
+  FILE_NOT_FOUND(HttpStatus.NOT_FOUND, "파일을 찾을 수 없습니다."),
+  FILE_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "파일 삭제에 실패했습니다."),
+  ;
   private final HttpStatus httpStatus;
   private final String description;
 }

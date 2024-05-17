@@ -37,4 +37,5 @@ out/
 .vscode/
 
 logs
-application.yml
+application-dev.yml
+application-prod.yml

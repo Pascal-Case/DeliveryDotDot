@@ -9,6 +9,7 @@ import jyang.deliverydotdot.dto.response.SuccessResponse;
 import jyang.deliverydotdot.dto.user.UserJoinForm;
 import jyang.deliverydotdot.dto.user.UserUpdateForm;
 import jyang.deliverydotdot.security.AuthenticationFacade;
+import jyang.deliverydotdot.service.S3Service;
 import jyang.deliverydotdot.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,6 +30,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
   private final UserService userService;
+
+  private final S3Service s3Service;
 
   private final AuthenticationFacade authenticationFacade;
 
@@ -65,5 +70,12 @@ public class UserController {
   ) {
     userService.deleteByLoginId(authenticationFacade.getUsername());
     return ResponseEntity.ok(SuccessResponse.of("유저를 성공적으로 삭제했습니다."));
+  }
+
+  @PostMapping("/reviews")
+  public ResponseEntity<SuccessResponse<?>> uploadReviewImage(
+      @RequestParam("file") MultipartFile file
+  ) {
+    return ResponseEntity.ok(SuccessResponse.of(s3Service.uploadReviewImage(file)));
   }
 }
