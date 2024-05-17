@@ -31,7 +31,7 @@ public class S3Service {
   private final String STORE_FOLDER = "store/";
 
   private final String DELIVERY_FOLDER = "delivery/";
-  
+
   @Transactional
   public String uploadReviewImage(MultipartFile file) {
     return upload(file, REVIEW_FOLDER);
@@ -78,6 +78,6 @@ public class S3Service {
   }
 
   public String getFileNameFromURL(String url) {
-    return url.substring(url.lastIndexOf("/") + 1);
+    return url.substring(url.indexOf("com/") + 4);
   }
 }

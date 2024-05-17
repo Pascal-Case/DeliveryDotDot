@@ -14,6 +14,7 @@ import jyang.deliverydotdot.service.CustomOAuth2Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -57,12 +58,22 @@ public class SecurityConfig {
     http
         .securityMatchers(
             auth -> auth
-                .requestMatchers("/api/v1/common/**")
+                .requestMatchers("/api/v1/common/**", "/api/v1/stores", "/api/v1/stores/**",
+                    "/api/v1/reviews/**")
 
         )
+
+        .addFilterBefore(
+            new JwtAuthenticationFilter(jwtTokenProvider),
+            UsernamePasswordAuthenticationFilter.class)
+
         .authorizeHttpRequests(request -> request
             .requestMatchers("/api/v1/common/**").permitAll()
             .requestMatchers("/error", "/favicon.ico", "/swagger-ui/**", "/v3/**").permitAll()
+            .requestMatchers(HttpMethod.POST, "/api/v1/stores/**").hasRole("PARTNER")
+            .requestMatchers(HttpMethod.PUT, "/api/v1/stores/**").hasRole("PARTNER")
+            .requestMatchers(HttpMethod.DELETE, "/api/v1/stores").hasRole("PARTNER")
+            .requestMatchers(HttpMethod.GET, "/api/v1/stores/**").permitAll()
             .anyRequest().authenticated()
 
         )
