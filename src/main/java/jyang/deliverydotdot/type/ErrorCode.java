@@ -33,6 +33,8 @@ public enum ErrorCode {
   STORE_CATEGORY_NOT_FOUND(HttpStatus.BAD_REQUEST, "존재하지 않는 가게 카테고리입니다."),
   NOT_STORE_OWNER(HttpStatus.BAD_REQUEST, "가게 소유자가 아닙니다."),
   STORE_NOT_FOUND(HttpStatus.BAD_REQUEST, "가게를 찾을 수 없습니다."),
+  MENU_CATEGORY_NOT_FOUND(HttpStatus.BAD_REQUEST, "메뉴 카테고리를 찾을 수 없습니다."),
+  MENU_CATEGORY_HAS_MENUS(HttpStatus.BAD_REQUEST, "메뉴 카테고리에 메뉴가 존재합니다. 메뉴를 먼저 삭제해주세요."),
   ;
   private final HttpStatus httpStatus;
   private final String description;

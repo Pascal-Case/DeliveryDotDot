@@ -6,9 +6,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jyang.deliverydotdot.domain.Partner;
 import jyang.deliverydotdot.dto.response.SuccessResponse;
+import jyang.deliverydotdot.dto.store.MenuCategoryRegisterForm;
+import jyang.deliverydotdot.dto.store.MenuRegisterForm;
 import jyang.deliverydotdot.dto.store.StoreRegisterForm;
 import jyang.deliverydotdot.dto.store.StoreUpdateForm;
 import jyang.deliverydotdot.security.AuthenticationFacade;
+import jyang.deliverydotdot.service.MenuCategoryService;
+import jyang.deliverydotdot.service.MenuService;
 import jyang.deliverydotdot.service.PartnerService;
 import jyang.deliverydotdot.service.StoreService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +22,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,6 +35,10 @@ public class StoreController {
   private final StoreService storeService;
 
   private final PartnerService partnerService;
+
+  private final MenuService menuService;
+
+  private final MenuCategoryService menuCategoryService;
 
   private final AuthenticationFacade authenticationFacade;
 
@@ -66,6 +75,45 @@ public class StoreController {
 
     return ResponseEntity.ok(
         SuccessResponse.of("가게를 성공적으로 삭제했습니다.")
+    );
+  }
+
+  @PostMapping("/{storeId}/menuCategories")
+  public ResponseEntity<SuccessResponse<?>> registerMenuCategory(
+      @PathVariable Long storeId,
+      @RequestBody @Valid MenuCategoryRegisterForm menuCategoryRegisterForm
+  ) {
+    Partner partner = partnerService.getPartnerByLoginId(authenticationFacade.getUsername());
+    menuCategoryService.registerMenuCategory(partner, storeId, menuCategoryRegisterForm);
+
+    return ResponseEntity.status(CREATED).body(
+        SuccessResponse.of("메뉴 카테고리를 성공적으로 등록했습니다.")
+    );
+  }
+
+  @DeleteMapping("/{storeId}/menuCategories/{menuCategoryId}")
+  public ResponseEntity<SuccessResponse<?>> deleteMenuCategory(
+      @PathVariable Long storeId,
+      @PathVariable Long menuCategoryId
+  ) {
+    Partner partner = partnerService.getPartnerByLoginId(authenticationFacade.getUsername());
+    menuCategoryService.deleteMenuCategory(partner, storeId, menuCategoryId);
+
+    return ResponseEntity.ok(
+        SuccessResponse.of("메뉴 카테고리를 성공적으로 삭제했습니다.")
+    );
+  }
+
+  @PostMapping("/{storeId}/menus")
+  public ResponseEntity<SuccessResponse<?>> registerMenu(
+      @PathVariable Long storeId,
+      @ModelAttribute @Valid MenuRegisterForm menuRegisterForm
+  ) {
+    Partner partner = partnerService.getPartnerByLoginId(authenticationFacade.getUsername());
+    menuService.registerMenu(partner, storeId, menuRegisterForm);
+
+    return ResponseEntity.status(CREATED).body(
+        SuccessResponse.of("메뉴를 성공적으로 등록했습니다.")
     );
   }
 

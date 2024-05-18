@@ -1,5 +1,6 @@
 package jyang.deliverydotdot.domain;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -10,8 +11,10 @@ import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import jyang.deliverydotdot.dto.store.StoreUpdateForm;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -42,6 +45,9 @@ public class Store extends BaseEntity {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "partner_id")
   private Partner partner;
+
+  @OneToMany(mappedBy = "store", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+  private List<MenuCategory> menuCategories;
 
   @Column(nullable = false)
   private String storeName;

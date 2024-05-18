@@ -190,7 +190,7 @@ public class StoreService {
    * @param storeId 가게 ID
    * @return 가게
    */
-  private Store findStore(Long storeId) {
+  public Store findStore(Long storeId) {
     return storeRepository.findById(storeId)
         .orElseThrow(() -> {
           log.warn("가게를 찾을 수 없습니다. storeId={}", storeId);
@@ -250,7 +250,13 @@ public class StoreService {
     }
   }
 
-  private void validateStoreOwner(Partner partner, Store store) {
+  /**
+   * 가게 소유자 확인
+   *
+   * @param partner 파트너
+   * @param store   가게
+   */
+  public void validateStoreOwner(Partner partner, Store store) {
     if (!store.getPartner().getPartnerId().equals(partner.getPartnerId())) {
       log.warn("가게 소유자가 아닙니다. partner={}, store={}",
           partner.getPartnerId(), store.getPartner().getPartnerId());
