@@ -43,17 +43,12 @@ public class GetCartResponse {
   public static GetCartResponse fromCart(Cart cart) {
     int totalPrice = 0;
     int totalQuantity = 0;
-    if (cart.getCartItems() != null && !cart.getCartItems().isEmpty()) {
-      totalPrice += cart.getCartItems().stream()
-          .mapToInt(CartItem::getPrice)
-          .map(cartItemPrice -> cartItemPrice * cart.getCartItems().stream()
-              .mapToInt(CartItem::getQuantity)
-              .sum())
-          .sum();
-      totalQuantity += cart.getCartItems().stream()
-          .mapToInt(CartItem::getQuantity)
-          .sum();
+
+    for (CartItem cartItem : cart.getCartItems()) {
+      totalPrice += cartItem.getTotalPrice();
+      totalQuantity += cartItem.getQuantity();
     }
+
     return GetCartResponse.builder()
         .cartId(cart.getCartId())
         .storeId(cart.getStore().getStoreId())
