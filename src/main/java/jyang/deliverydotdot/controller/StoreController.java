@@ -2,6 +2,7 @@ package jyang.deliverydotdot.controller;
 
 import static org.springframework.http.HttpStatus.CREATED;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jyang.deliverydotdot.domain.Partner;
@@ -43,6 +44,7 @@ public class StoreController {
 
   private final AuthenticationFacade authenticationFacade;
 
+  @Operation(summary = "가게 등록", description = "가게 등록 폼으로 가게 등록")
   @PostMapping
   public ResponseEntity<SuccessResponse<?>> registerStore(
       @ModelAttribute @Valid StoreRegisterForm storeRegisterForm
@@ -55,6 +57,7 @@ public class StoreController {
     );
   }
 
+  @Operation(summary = "가게 정보 수정", description = "가게 정보 수정")
   @PutMapping
   public ResponseEntity<SuccessResponse<?>> updateStore(
       @ModelAttribute @Valid StoreUpdateForm storeUpdateForm
@@ -67,6 +70,7 @@ public class StoreController {
     );
   }
 
+  @Operation(summary = "가게 삭제", description = "가게 삭제")
   @DeleteMapping("/{storeId}")
   public ResponseEntity<SuccessResponse<?>> deleteStore(
       @PathVariable Long storeId
@@ -79,6 +83,7 @@ public class StoreController {
     );
   }
 
+  @Operation(summary = "메뉴 카테고리 등록", description = "메뉴 카테고리 등록")
   @PostMapping("/{storeId}/menuCategories")
   public ResponseEntity<SuccessResponse<?>> registerMenuCategory(
       @PathVariable Long storeId,
@@ -92,6 +97,7 @@ public class StoreController {
     );
   }
 
+  @Operation(summary = "메뉴 카테고리 삭제", description = "메뉴 카테고리 삭제")
   @DeleteMapping("/{storeId}/menuCategories/{menuCategoryId}")
   public ResponseEntity<SuccessResponse<?>> deleteMenuCategory(
       @PathVariable Long storeId,
@@ -105,6 +111,7 @@ public class StoreController {
     );
   }
 
+  @Operation(summary = "단일 메뉴 카테고리 추가", description = "단일 메뉴 카테고리 추가")
   @PostMapping("/{storeId}/menuCategories/add")
   public ResponseEntity<SuccessResponse<?>> addMenuCategory(
       @PathVariable Long storeId,
@@ -118,6 +125,7 @@ public class StoreController {
     );
   }
 
+  @Operation(summary = "메뉴 카테고리 수정", description = "메뉴 카테고리 수정")
   @PutMapping("/{storeId}/menuCategories/{menuCategoryId}")
   public ResponseEntity<SuccessResponse<?>> updateMenuCategory(
       @PathVariable Long storeId,
@@ -133,6 +141,7 @@ public class StoreController {
     );
   }
 
+  @Operation(summary = "메뉴 등록", description = "메뉴 등록 폼으로 메뉴 등록")
   @PostMapping("/{storeId}/menus")
   public ResponseEntity<SuccessResponse<?>> registerMenu(
       @PathVariable Long storeId,
@@ -146,6 +155,7 @@ public class StoreController {
     );
   }
 
+  @Operation(summary = "메뉴 삭제", description = "메뉴 삭제")
   @DeleteMapping("/{storeId}/menus/{menuId}")
   public ResponseEntity<SuccessResponse<?>> deleteMenu(
       @PathVariable Long storeId,
@@ -159,6 +169,7 @@ public class StoreController {
     );
   }
 
+  @Operation(summary = "메뉴 수정", description = "메뉴 수정")
   @PutMapping("/{storeId}/menus/{menuId}")
   public ResponseEntity<SuccessResponse<?>> updateMenu(
       @PathVariable Long storeId,
