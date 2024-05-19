@@ -14,6 +14,7 @@ import jyang.deliverydotdot.domain.Store;
 import jyang.deliverydotdot.domain.User;
 import jyang.deliverydotdot.dto.user.CartDTO;
 import jyang.deliverydotdot.dto.user.CartDTO.CartItemDTO;
+import jyang.deliverydotdot.dto.user.GetCartResponse;
 import jyang.deliverydotdot.exception.RestApiException;
 import jyang.deliverydotdot.repository.CartItemRepository;
 import jyang.deliverydotdot.repository.CartRepository;
@@ -64,6 +65,31 @@ public class CartService {
       Store store = storeService.findStore(newStoreId);
       cart.setStore(store);
     }
+  }
+
+  /**
+   * 장바구니 조회
+   *
+   * @param user 사용자
+   * @return 장바구니 응답 객체
+   */
+  public GetCartResponse getCart(User user) {
+    Optional<Cart> cart = cartRepository.findByUser(user);
+
+    return cart.map(GetCartResponse::fromCart)
+        .orElseGet(GetCartResponse.builder()::build);
+  }
+
+  /**
+   * 장바구니 삭제
+   *
+   * @param user 사용자
+   */
+  @Transactional
+  public void deleteCart(User user) {
+    Optional<Cart> cart = cartRepository.findByUser(user);
+
+    cart.ifPresent(cartRepository::delete);
   }
 
   /**
@@ -160,4 +186,6 @@ public class CartService {
         .map(Store::getStoreId)
         .orElseThrow(() -> new RestApiException(INVALID_CART_ITEM));
   }
+
+
 }

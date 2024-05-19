@@ -12,5 +12,4 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
 
   Optional<CartItem> findByCartAndMenu(Cart cart, Menu menu);
 
-  void deleteByCart(Cart existCart);
 }

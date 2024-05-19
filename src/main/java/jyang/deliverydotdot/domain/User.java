@@ -1,6 +1,5 @@
 package jyang.deliverydotdot.domain;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -63,7 +62,7 @@ public class User extends BaseEntity {
 
   private String providerId;
 
-  @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
   private Cart cart;
 
   public void updateWithOAuth2Response(OAuth2Response oAuth2Response) {

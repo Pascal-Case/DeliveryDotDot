@@ -84,4 +84,22 @@ public class UserController {
         SuccessResponse.of("장바구니에 메뉴를 성공적으로 추가했습니다.")
     );
   }
+
+  @Operation(summary = "장바구니 조회", description = "장바구니 조회")
+  @GetMapping("/cart")
+  public ResponseEntity<SuccessResponse<?>> getCart(
+  ) {
+    User user = userService.getUserByLoginId(authenticationFacade.getUsername());
+    return ResponseEntity.ok(SuccessResponse.of(
+        "장바구니를 성공적으로 조회했습니다.", cartService.getCart(user)));
+  }
+
+  @Operation(summary = "장바구니 삭제", description = "장바구니 삭제")
+  @DeleteMapping("/cart")
+  public ResponseEntity<SuccessResponse<?>> deleteCart(
+  ) {
+    User user = userService.getUserByLoginId(authenticationFacade.getUsername());
+    cartService.deleteCart(user);
+    return ResponseEntity.ok(SuccessResponse.of("장바구니를 성공적으로 삭제했습니다."));
+  }
 }
