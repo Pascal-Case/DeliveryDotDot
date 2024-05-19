@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import jyang.deliverydotdot.domain.User;
 import jyang.deliverydotdot.dto.response.SuccessResponse;
 import jyang.deliverydotdot.dto.user.CartDTO;
+import jyang.deliverydotdot.dto.user.CartDTO.CartItemDTO;
 import jyang.deliverydotdot.dto.user.UserJoinForm;
 import jyang.deliverydotdot.dto.user.UserUpdateForm;
 import jyang.deliverydotdot.security.AuthenticationFacade;
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -101,5 +103,25 @@ public class UserController {
     User user = userService.getUserByLoginId(authenticationFacade.getUsername());
     cartService.deleteCart(user);
     return ResponseEntity.ok(SuccessResponse.of("장바구니를 성공적으로 삭제했습니다."));
+  }
+
+  @Operation(summary = "장바구니 메뉴 삭제", description = "장바구니에 담긴 메뉴 삭제")
+  @DeleteMapping("/cart/menu/{menuId}")
+  public ResponseEntity<SuccessResponse<?>> deleteCartMenu(
+      @PathVariable Long menuId
+  ) {
+    User user = userService.getUserByLoginId(authenticationFacade.getUsername());
+    cartService.deleteCartMenu(user, menuId);
+    return ResponseEntity.ok(SuccessResponse.of("장바구니에 담긴 메뉴를 성공적으로 삭제했습니다."));
+  }
+
+  @Operation(summary = "장바구니 메뉴 수정", description = "장바구니에 담긴 메뉴 수정")
+  @PutMapping("/cart/menu")
+  public ResponseEntity<SuccessResponse<?>> updateCartMenu(
+      @RequestBody @Valid CartItemDTO cartItemDTO
+  ) {
+    User user = userService.getUserByLoginId(authenticationFacade.getUsername());
+    cartService.updateCartMenu(user, cartItemDTO);
+    return ResponseEntity.ok(SuccessResponse.of("장바구니에 담긴 메뉴를 성공적으로 수정했습니다."));
   }
 }

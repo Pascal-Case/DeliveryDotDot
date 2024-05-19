@@ -93,6 +93,42 @@ public class CartService {
   }
 
   /**
+   * 장바구니 메뉴 삭제
+   *
+   * @param user   사용자
+   * @param menuId 메뉴 id
+   */
+
+  @Transactional
+  public void deleteCartMenu(User user, Long menuId) {
+    CartItem cartItem = cartItemRepository.findByCartUserAndMenuMenuId(user, menuId)
+        .orElseThrow(() -> new RestApiException(INVALID_CART_ITEM));
+
+    cartItemRepository.delete(cartItem);
+
+    boolean isCartEmpty = cartItemRepository.findByCart(cartItem.getCart()).isEmpty();
+    if (isCartEmpty) {
+      cartRepository.delete(cartItem.getCart());
+    }
+
+  }
+
+  /**
+   * 장바구니 메뉴 수정
+   *
+   * @param user        사용자
+   * @param cartItemDTO 장바구니 메뉴 dto
+   */
+  @Transactional
+  public void updateCartMenu(User user, CartItemDTO cartItemDTO) {
+    CartItem cartItem = cartItemRepository.findByCartUserAndMenuMenuId(user,
+            cartItemDTO.getMenuId())
+        .orElseThrow(() -> new RestApiException(INVALID_CART_ITEM));
+
+    cartItem.updateQuantity(cartItemDTO.getQuantity());
+  }
+
+  /**
    * 유효한 장바구니인지 확인
    *
    * @param cartDTO 장바구니 dto
@@ -186,6 +222,5 @@ public class CartService {
         .map(Store::getStoreId)
         .orElseThrow(() -> new RestApiException(INVALID_CART_ITEM));
   }
-
 
 }

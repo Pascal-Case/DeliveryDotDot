@@ -45,8 +45,12 @@ public class CartItem {
     this.quantity += quantity;
   }
 
-  public void removeQuantity(Integer quantity) {
-    this.quantity -= quantity;
+  public void updateQuantity(Integer quantity) {
+    this.quantity = quantity;
+  }
+
+  public Integer getTotalPrice() {
+    return price * quantity;
   }
 
 }
