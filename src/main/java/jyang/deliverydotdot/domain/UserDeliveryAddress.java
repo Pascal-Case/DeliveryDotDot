@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jyang.deliverydotdot.dto.user.UserDeliveryAddressDTO.UpdateAddressRequest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -41,4 +42,11 @@ public class UserDeliveryAddress {
   @Column(nullable = false)
   private boolean isDefaultAddress;
 
+
+  public void update(UpdateAddressRequest userDeliveryAddressDTO, Point coordinates) {
+    this.addressName = userDeliveryAddressDTO.getAddressName();
+    this.address = userDeliveryAddressDTO.getAddress();
+    this.coordinates = coordinates;
+    this.isDefaultAddress = userDeliveryAddressDTO.getIsDefault();
+  }
 }

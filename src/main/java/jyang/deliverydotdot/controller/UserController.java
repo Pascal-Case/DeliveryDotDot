@@ -9,6 +9,8 @@ import jyang.deliverydotdot.domain.User;
 import jyang.deliverydotdot.dto.response.SuccessResponse;
 import jyang.deliverydotdot.dto.user.CartDTO;
 import jyang.deliverydotdot.dto.user.CartDTO.CartItemDTO;
+import jyang.deliverydotdot.dto.user.UserDeliveryAddressDTO.AddAddressRequest;
+import jyang.deliverydotdot.dto.user.UserDeliveryAddressDTO.UpdateAddressRequest;
 import jyang.deliverydotdot.dto.user.UserJoinForm;
 import jyang.deliverydotdot.dto.user.UserUpdateForm;
 import jyang.deliverydotdot.security.AuthenticationFacade;
@@ -123,5 +125,46 @@ public class UserController {
     User user = userService.getUserByLoginId(authenticationFacade.getUsername());
     cartService.updateCartMenu(user, cartItemDTO);
     return ResponseEntity.ok(SuccessResponse.of("장바구니에 담긴 메뉴를 성공적으로 수정했습니다."));
+  }
+
+  @Operation(summary = "배송지 추가", description = "배송지 추가")
+  @PostMapping("/address")
+  public ResponseEntity<SuccessResponse<?>> addAddress(
+      @RequestBody @Valid AddAddressRequest userDeliveryAddressDTO
+  ) {
+    User user = userService.getUserByLoginId(authenticationFacade.getUsername());
+    userService.addAddress(user, userDeliveryAddressDTO);
+    return ResponseEntity.status(CREATED).body(
+        SuccessResponse.of("배송지를 성공적으로 추가했습니다.")
+    );
+  }
+
+  @Operation(summary = "배송지 삭제", description = "배송지 삭제")
+  @DeleteMapping("/address/{addressId}")
+  public ResponseEntity<SuccessResponse<?>> deleteAddress(
+      @PathVariable Long addressId
+  ) {
+    User user = userService.getUserByLoginId(authenticationFacade.getUsername());
+    userService.deleteAddress(user, addressId);
+    return ResponseEntity.ok(SuccessResponse.of("배송지를 성공적으로 삭제했습니다."));
+  }
+
+  @Operation(summary = "배송지 수정", description = "배송지 수정")
+  @PutMapping("/address")
+  public ResponseEntity<SuccessResponse<?>> updateAddress(
+      @RequestBody @Valid UpdateAddressRequest userDeliveryAddressDTO
+  ) {
+    User user = userService.getUserByLoginId(authenticationFacade.getUsername());
+    userService.updateAddress(user, userDeliveryAddressDTO);
+    return ResponseEntity.ok(SuccessResponse.of("배송지를 성공적으로 수정했습니다."));
+  }
+
+  @Operation(summary = "배송지 조회", description = "배송지 조회")
+  @GetMapping("/address")
+  public ResponseEntity<SuccessResponse<?>> getAddress(
+  ) {
+    User user = userService.getUserByLoginId(authenticationFacade.getUsername());
+    return ResponseEntity.ok(SuccessResponse.of(
+        "배송지를 성공적으로 조회했습니다.", userService.getAddress(user)));
   }
 }

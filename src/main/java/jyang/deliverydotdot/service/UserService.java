@@ -6,14 +6,20 @@ import static jyang.deliverydotdot.type.ErrorCode.ALREADY_REGISTERED_LOGIN_ID;
 import static jyang.deliverydotdot.type.ErrorCode.ALREADY_REGISTERED_PHONE;
 import static jyang.deliverydotdot.type.ErrorCode.USER_NOT_FOUND;
 
+import java.util.List;
+import java.util.Objects;
 import jyang.deliverydotdot.domain.User;
 import jyang.deliverydotdot.domain.UserDeliveryAddress;
+import jyang.deliverydotdot.dto.user.UserDeliveryAddressDTO.AddAddressRequest;
+import jyang.deliverydotdot.dto.user.UserDeliveryAddressDTO.AddressResponse;
+import jyang.deliverydotdot.dto.user.UserDeliveryAddressDTO.UpdateAddressRequest;
 import jyang.deliverydotdot.dto.user.UserInfo;
 import jyang.deliverydotdot.dto.user.UserJoinForm;
 import jyang.deliverydotdot.dto.user.UserUpdateForm;
 import jyang.deliverydotdot.exception.RestApiException;
 import jyang.deliverydotdot.repository.UserDeliveryAddressRepository;
 import jyang.deliverydotdot.repository.UserRepository;
+import jyang.deliverydotdot.type.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Point;
@@ -175,5 +181,97 @@ public class UserService {
       log.warn("Already registered phone : {} ", phone);
       throw new RestApiException(ALREADY_REGISTERED_PHONE);
     }
+  }
+
+  /**
+   * 사용자 배송지 추가
+   *
+   * @param user                사용자
+   * @param userDeliveryAddress 사용자 배송지 DTO
+   */
+  @Transactional
+  public void addAddress(User user, AddAddressRequest userDeliveryAddress) {
+    Point coordinates = locationService.getCoordinatesFromAddress(
+        userDeliveryAddress.getAddress());
+
+    if (userDeliveryAddress.getIsDefault() != null && userDeliveryAddress.getIsDefault()) {
+      userDeliveryAddressRepository.clearDefaultAddress(user);
+    }
+
+    UserDeliveryAddress address = UserDeliveryAddress.builder()
+        .user(user)
+        .addressName(userDeliveryAddress.getAddressName())
+        .address(userDeliveryAddress.getAddress())
+        .coordinates(coordinates)
+        .isDefaultAddress(userDeliveryAddress.getIsDefault())
+        .build();
+
+    userDeliveryAddressRepository.save(address);
+
+  }
+
+  /**
+   * 사용자 배송지 삭제
+   *
+   * @param user      사용자
+   * @param addressId 배송지 ID
+   */
+  @Transactional
+  public void deleteAddress(User user, Long addressId) {
+    UserDeliveryAddress address = findByAddressId(addressId);
+
+    validateAddress(user, address);
+
+    userDeliveryAddressRepository.delete(address);
+  }
+
+  public UserDeliveryAddress findByAddressId(Long addressId) {
+    return userDeliveryAddressRepository.findById(addressId)
+        .orElseThrow(() -> new RestApiException(ErrorCode.ADDRESS_NOT_FOUND));
+  }
+
+  public void validateAddress(User user, UserDeliveryAddress address) {
+    if (!Objects.equals(address.getUser().getUserId(), user.getUserId())) {
+      throw new RestApiException(ErrorCode.ADDRESS_NOT_BOUND_TO_USER);
+    }
+  }
+
+  /**
+   * 사용자 배송지 수정
+   *
+   * @param user                   사용자
+   * @param userDeliveryAddressDTO 사용자 배송지 DTO
+   */
+  @Transactional
+  public void updateAddress(User user, UpdateAddressRequest userDeliveryAddressDTO) {
+    UserDeliveryAddress address = findByAddressId(userDeliveryAddressDTO.getAddressId());
+
+    validateAddress(user, address);
+
+    if (address.getAddress().equals(userDeliveryAddressDTO.getAddress())) {
+      return;
+    }
+
+    if (userDeliveryAddressDTO.getIsDefault() != null && userDeliveryAddressDTO.getIsDefault()) {
+      userDeliveryAddressRepository.clearDefaultAddress(user);
+    }
+
+    Point coordinates = locationService.getCoordinatesFromAddress(
+        userDeliveryAddressDTO.getAddress());
+
+    address.update(userDeliveryAddressDTO, coordinates);
+  }
+
+  /**
+   * 사용자 배송지 조회
+   *
+   * @param user 사용자
+   * @return 사용자 배송지 목록
+   */
+  public List<AddressResponse> getAddress(User user) {
+    return userDeliveryAddressRepository.findByUserOrderByDefaultAddress(user)
+        .stream()
+        .map(AddressResponse::fromEntity)
+        .toList();
   }
 }
