@@ -5,11 +5,13 @@ import static org.springframework.http.HttpStatus.CREATED;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jyang.deliverydotdot.domain.User;
 import jyang.deliverydotdot.dto.response.SuccessResponse;
+import jyang.deliverydotdot.dto.user.CartDTO;
 import jyang.deliverydotdot.dto.user.UserJoinForm;
 import jyang.deliverydotdot.dto.user.UserUpdateForm;
 import jyang.deliverydotdot.security.AuthenticationFacade;
-import jyang.deliverydotdot.service.S3Service;
+import jyang.deliverydotdot.service.CartService;
 import jyang.deliverydotdot.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,9 +21,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,7 +31,7 @@ public class UserController {
 
   private final UserService userService;
 
-  private final S3Service s3Service;
+  private final CartService cartService;
 
   private final AuthenticationFacade authenticationFacade;
 
@@ -72,10 +72,16 @@ public class UserController {
     return ResponseEntity.ok(SuccessResponse.of("유저를 성공적으로 삭제했습니다."));
   }
 
-  @PostMapping("/reviews")
-  public ResponseEntity<SuccessResponse<?>> uploadReviewImage(
-      @RequestParam("file") MultipartFile file
+  @Operation(summary = "장바구니 추가", description = "장바구니에 메뉴 추가")
+  @PostMapping("/cart")
+  public ResponseEntity<SuccessResponse<?>> addCart(
+      @RequestBody @Valid CartDTO cartDTO
   ) {
-    return ResponseEntity.ok(SuccessResponse.of(s3Service.uploadReviewImage(file)));
+    User user = userService.getUserByLoginId(authenticationFacade.getUsername());
+    cartService.addCart(user, cartDTO);
+
+    return ResponseEntity.status(CREATED).body(
+        SuccessResponse.of("장바구니에 메뉴를 성공적으로 추가했습니다.")
+    );
   }
 }

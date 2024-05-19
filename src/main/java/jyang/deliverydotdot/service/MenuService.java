@@ -134,7 +134,7 @@ public class MenuService {
    * @param menuId 메뉴 ID
    * @return 메뉴
    */
-  private Menu getMenuById(Long menuId) {
+  public Menu getMenuById(Long menuId) {
     return menuRepository.findById(menuId)
         .orElseThrow(() -> new RestApiException(ErrorCode.MENU_NOT_FOUND));
   }

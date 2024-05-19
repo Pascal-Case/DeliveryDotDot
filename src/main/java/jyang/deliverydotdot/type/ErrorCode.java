@@ -36,9 +36,11 @@ public enum ErrorCode {
   MENU_CATEGORY_NOT_FOUND(HttpStatus.BAD_REQUEST, "메뉴 카테고리를 찾을 수 없습니다."),
   MENU_CATEGORY_HAS_MENUS(HttpStatus.BAD_REQUEST, "메뉴 카테고리에 메뉴가 존재합니다. 메뉴를 먼저 삭제해주세요."),
   INVALID_MENU_CATEGORY_COUNT(HttpStatus.BAD_REQUEST, "메뉴 카테고리는 1개 이상 5개 이하로 등록 가능합니다."),
-  
+
   MENU_NOT_FOUND(HttpStatus.BAD_REQUEST, "메뉴를 찾을 수 없습니다."),
-  ;
+  INVALID_CART_ITEM(HttpStatus.BAD_REQUEST, "유효하지 않은 장바구니 아이템입니다."),
+  CART_ITEM_NOT_SAME_STORE(HttpStatus.BAD_REQUEST, "장바구니에는 같은 가게의 메뉴만 추가 가능합니다.");
+
   private final HttpStatus httpStatus;
   private final String description;
 }

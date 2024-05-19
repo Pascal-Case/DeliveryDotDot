@@ -88,7 +88,7 @@ public class UserService {
    * @param loginId 로그인 아이디
    * @return 사용자
    */
-  private User getUserByLoginId(String loginId) {
+  public User getUserByLoginId(String loginId) {
     return userRepository.findByLoginId(loginId)
         .orElseThrow(() -> new RestApiException(USER_NOT_FOUND));
   }

@@ -1,14 +1,17 @@
 package jyang.deliverydotdot.domain;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
+import jakarta.persistence.OneToOne;
 import java.time.LocalDateTime;
 import jyang.deliverydotdot.dto.oauth2.OAuth2Response;
 import jyang.deliverydotdot.dto.user.UserUpdateForm;
@@ -59,6 +62,9 @@ public class User extends BaseEntity {
   private String provider;
 
   private String providerId;
+
+  @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  private Cart cart;
 
   public void updateWithOAuth2Response(OAuth2Response oAuth2Response) {
     this.email = oAuth2Response.getEmail();
