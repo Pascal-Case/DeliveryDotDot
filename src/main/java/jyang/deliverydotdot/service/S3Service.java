@@ -29,9 +29,10 @@ public class S3Service {
   private final String REVIEW_FOLDER = "review/";
 
   private final String STORE_FOLDER = "store/";
+  private final String MENU_FOLDER = "menu/";
 
   private final String DELIVERY_FOLDER = "delivery/";
-  
+
   @Transactional
   public String uploadReviewImage(MultipartFile file) {
     return upload(file, REVIEW_FOLDER);
@@ -43,10 +44,22 @@ public class S3Service {
   }
 
   @Transactional
+  public String uploadMenuImage(MultipartFile file) {
+    return upload(file, MENU_FOLDER);
+  }
+
+  @Transactional
   public String uploadDeliveryImage(MultipartFile file) {
     return upload(file, DELIVERY_FOLDER);
   }
 
+  /**
+   * S3에 파일 업로드
+   *
+   * @param file   파일
+   * @param folder 폴더
+   * @return 업로드된 파일 URL
+   */
   public String upload(MultipartFile file, String folder) {
     String fileName = folder + UUID.randomUUID() + file.getOriginalFilename();
 
@@ -67,6 +80,11 @@ public class S3Service {
     }
   }
 
+  /**
+   * S3에 저장된 파일 삭제
+   *
+   * @param url 파일 URL
+   */
   @Transactional
   public void delete(String url) {
     try {
@@ -78,6 +96,6 @@ public class S3Service {
   }
 
   public String getFileNameFromURL(String url) {
-    return url.substring(url.lastIndexOf("/") + 1);
+    return url.substring(url.indexOf("com/") + 4);
   }
 }

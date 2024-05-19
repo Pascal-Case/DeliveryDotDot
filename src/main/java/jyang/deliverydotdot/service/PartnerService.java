@@ -101,7 +101,7 @@ public class PartnerService {
    * @param loginId 로그인 아이디
    * @return 파트너
    */
-  private Partner getPartnerByLoginId(String loginId) {
+  public Partner getPartnerByLoginId(String loginId) {
     return partnerRepository.findByLoginId(loginId)
         .orElseThrow(() -> new RestApiException(PARTNER_NOT_FOUND));
   }
