@@ -54,4 +54,8 @@ public class Cart extends BaseEntity {
     cartItem.setCart(null);
   }
 
+  public void clearCartItems() {
+    this.cartItems.clear();
+  }
+
 }

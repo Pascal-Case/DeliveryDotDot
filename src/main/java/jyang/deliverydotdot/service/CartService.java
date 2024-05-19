@@ -3,6 +3,7 @@ package jyang.deliverydotdot.service;
 import static jyang.deliverydotdot.type.ErrorCode.CART_ITEM_NOT_SAME_STORE;
 import static jyang.deliverydotdot.type.ErrorCode.INVALID_CART_ITEM;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -41,27 +42,28 @@ public class CartService {
    */
   @Transactional
   public void addCart(User user, CartDTO cartDTO) {
-
     validateCartDTO(cartDTO);
 
     Cart cart = getOrCreateCart(user);
+    Long newStoreId = getStoreIdFromCartDTO(cartDTO);
+    clearExistingCartItemsIfNeeded(cart, newStoreId);
 
-    clearExistingCartItemsIfNeeded(cart, cartDTO);
-
-    Long prevStoreId = null;
     for (CartItemDTO cartItemDTO : cartDTO.getCartItems()) {
       Menu menu = menuService.getMenuById(cartItemDTO.getMenuId());
 
-      Long storeId = menu.getStore().getStoreId();
-
-      validateStoreId(prevStoreId, storeId);
-      prevStoreId = menu.getStore().getStoreId();
+      if (cart.getStore() == null) {
+        cart.setStore(menu.getStore());
+      } else {
+        validateStoreId(cart.getStore(), menu.getStore());
+      }
 
       addOrUpdateCartItem(cart, menu, cartItemDTO.getQuantity());
     }
 
-    Store store = storeService.findStore(prevStoreId);
-    cart.setStore(store);
+    if (cart.getStore() == null || !Objects.equals(cart.getStore().getStoreId(), newStoreId)) {
+      Store store = storeService.findStore(newStoreId);
+      cart.setStore(store);
+    }
   }
 
   /**
@@ -86,6 +88,7 @@ public class CartService {
     return cartRepository.findByUser(user).orElseGet(() -> {
       Cart newCart = Cart.builder()
           .user(user)
+          .cartItems(new HashSet<>())
           .build();
       cartRepository.save(newCart);
       return newCart;
@@ -95,18 +98,17 @@ public class CartService {
   /**
    * 기존 장바구니 삭제가 필요한지 확인 후 삭제
    *
-   * @param cart    장바구니
-   * @param cartDTO 장바구니 dto
+   * @param cart       장바구니
+   * @param newStoreId 새로 추가된 메뉴의 가게 id
    */
-  private void clearExistingCartItemsIfNeeded(Cart cart, CartDTO cartDTO) {
+  private void clearExistingCartItemsIfNeeded(Cart cart, Long newStoreId) {
     Set<CartItem> cartItems = cart.getCartItems();
     if (cartItems != null && !cartItems.isEmpty()) {
       Long prevStoreId = cartItems.iterator().next().getMenu().getStore().getStoreId();
-      Long currentStoreId = cartDTO.getCartItems().iterator().next().getMenuId();
-
-      // 같은 가게가 아닌 경우 기존 장바구니 삭제
-      if (!Objects.equals(prevStoreId, currentStoreId)) {
-        cartItemRepository.deleteByCart(cart);
+      if (!Objects.equals(prevStoreId, newStoreId)) {
+        cartItemRepository.deleteAll(cartItems);
+        cart.clearCartItems();
+        cart.setStore(null);
       }
     }
   }
@@ -114,11 +116,11 @@ public class CartService {
   /**
    * 같은 가게의 메뉴인지 확인
    *
-   * @param prevStoreId    이전 가게 id
-   * @param currentStoreId 현재 가게 id
+   * @param cartStore 장바구니의 가게
+   * @param menuStore 메뉴의 가게
    */
-  private void validateStoreId(Long prevStoreId, Long currentStoreId) {
-    if (prevStoreId != null && !Objects.equals(prevStoreId, currentStoreId)) {
+  private void validateStoreId(Store cartStore, Store menuStore) {
+    if (cartStore != null && !Objects.equals(cartStore.getStoreId(), menuStore.getStoreId())) {
       throw new RestApiException(CART_ITEM_NOT_SAME_STORE);
     }
   }
@@ -147,5 +149,15 @@ public class CartService {
 
       cartItemRepository.save(cartItem);
     }
+  }
+
+  private Long getStoreIdFromCartDTO(CartDTO cartDTO) {
+    return cartDTO.getCartItems().stream()
+        .findFirst()
+        .map(CartItemDTO::getMenuId)
+        .map(menuService::getMenuById)
+        .map(Menu::getStore)
+        .map(Store::getStoreId)
+        .orElseThrow(() -> new RestApiException(INVALID_CART_ITEM));
   }
 }
