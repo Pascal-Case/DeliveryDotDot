@@ -1,5 +1,8 @@
 package jyang.deliverydotdot.service;
 
+import static jyang.deliverydotdot.type.ErrorCode.MENU_CATEGORY_DOES_NOT_BELONG_TO_STORE;
+import static jyang.deliverydotdot.type.ErrorCode.MENU_DOES_NOT_BELONG_TO_STORE;
+
 import jyang.deliverydotdot.domain.Menu;
 import jyang.deliverydotdot.domain.MenuCategory;
 import jyang.deliverydotdot.domain.Partner;
@@ -47,6 +50,11 @@ public class MenuService {
     MenuCategory menuCategory =
         menuCategoryService.getMenuCategoryById(menuRegisterForm.getMenuCategoryId());
 
+    // 메뉴 카테고리가 가게에 속해 있는지 확인
+    if (!menuCategory.getStore().getStoreId().equals(storeId)) {
+      throw new RestApiException(MENU_CATEGORY_DOES_NOT_BELONG_TO_STORE);
+    }
+
     // 메뉴 사진 업로드
     String menuImageURL = s3Service.uploadMenuImage(menuRegisterForm.getMenuImage());
 
@@ -83,7 +91,7 @@ public class MenuService {
 
     // 메뉴가 가게에 속해 있는지 확인
     if (!menu.getStore().getStoreId().equals(storeId)) {
-      throw new RestApiException(ErrorCode.MENU_NOT_FOUND);
+      throw new RestApiException(MENU_DOES_NOT_BELONG_TO_STORE);
     }
 
     // 메뉴 삭제
@@ -114,7 +122,7 @@ public class MenuService {
 
     // 메뉴가 가게에 속해 있는지 확인
     if (!menu.getStore().getStoreId().equals(storeId)) {
-      throw new RestApiException(ErrorCode.MENU_NOT_FOUND);
+      throw new RestApiException(MENU_DOES_NOT_BELONG_TO_STORE);
     }
 
     // 기존 메뉴 사진 삭제
