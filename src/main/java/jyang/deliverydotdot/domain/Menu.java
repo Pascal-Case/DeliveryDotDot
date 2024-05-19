@@ -10,6 +10,7 @@ import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDateTime;
+import jyang.deliverydotdot.dto.store.MenuRegisterForm;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -49,4 +50,10 @@ public class Menu extends BaseEntity {
 
   private LocalDateTime deletedAt;
 
+  public void updateMenu(MenuRegisterForm menuUpdateForm, String menuImageURL) {
+    this.menuName = menuUpdateForm.getMenuName();
+    this.price = menuUpdateForm.getPrice();
+    this.menuDescription = menuUpdateForm.getMenuDescription();
+    this.menuImageUrl = menuImageURL;
+  }
 }

@@ -146,5 +146,32 @@ public class StoreController {
     );
   }
 
+  @DeleteMapping("/{storeId}/menus/{menuId}")
+  public ResponseEntity<SuccessResponse<?>> deleteMenu(
+      @PathVariable Long storeId,
+      @PathVariable Long menuId
+  ) {
+    Partner partner = partnerService.getPartnerByLoginId(authenticationFacade.getUsername());
+    menuService.deleteMenu(partner, storeId, menuId);
+
+    return ResponseEntity.ok(
+        SuccessResponse.of("메뉴를 성공적으로 삭제했습니다.")
+    );
+  }
+
+  @PutMapping("/{storeId}/menus/{menuId}")
+  public ResponseEntity<SuccessResponse<?>> updateMenu(
+      @PathVariable Long storeId,
+      @PathVariable Long menuId,
+      @ModelAttribute @Valid MenuRegisterForm menuUpdateForm
+  ) {
+    Partner partner = partnerService.getPartnerByLoginId(authenticationFacade.getUsername());
+    menuService.updateMenu(partner, storeId, menuId, menuUpdateForm);
+
+    return ResponseEntity.ok(
+        SuccessResponse.of("메뉴를 성공적으로 수정했습니다.")
+    );
+  }
+
 
 }
