@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jyang.deliverydotdot.domain.Partner;
 import jyang.deliverydotdot.dto.response.SuccessResponse;
+import jyang.deliverydotdot.dto.store.MenuCategoryDTO;
 import jyang.deliverydotdot.dto.store.MenuCategoryRegisterForm;
 import jyang.deliverydotdot.dto.store.MenuRegisterForm;
 import jyang.deliverydotdot.dto.store.StoreRegisterForm;
@@ -101,6 +102,34 @@ public class StoreController {
 
     return ResponseEntity.ok(
         SuccessResponse.of("메뉴 카테고리를 성공적으로 삭제했습니다.")
+    );
+  }
+
+  @PostMapping("/{storeId}/menuCategories/add")
+  public ResponseEntity<SuccessResponse<?>> addMenuCategory(
+      @PathVariable Long storeId,
+      @RequestBody @Valid MenuCategoryDTO menuCategoryDTO
+  ) {
+    Partner partner = partnerService.getPartnerByLoginId(authenticationFacade.getUsername());
+    menuCategoryService.addSingleMenuCategory(partner, storeId, menuCategoryDTO);
+
+    return ResponseEntity.status(CREATED).body(
+        SuccessResponse.of("메뉴 카테고리를 성공적으로 등록했습니다.")
+    );
+  }
+
+  @PutMapping("/{storeId}/menuCategories/{menuCategoryId}")
+  public ResponseEntity<SuccessResponse<?>> updateMenuCategory(
+      @PathVariable Long storeId,
+      @PathVariable Long menuCategoryId,
+      @RequestBody @Valid MenuCategoryDTO menuCategoryDTO
+  ) {
+    Partner partner = partnerService.getPartnerByLoginId(authenticationFacade.getUsername());
+    menuCategoryService.updateMenuCategory(partner, storeId, menuCategoryId,
+        menuCategoryDTO);
+
+    return ResponseEntity.ok(
+        SuccessResponse.of("메뉴 카테고리를 성공적으로 수정했습니다.")
     );
   }
 

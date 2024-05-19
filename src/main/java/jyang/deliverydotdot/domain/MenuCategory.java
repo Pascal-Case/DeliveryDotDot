@@ -37,4 +37,12 @@ public class MenuCategory {
 
   private Integer displayOrder;
 
+  public void updateCategoryName(String categoryName) {
+    this.categoryName = categoryName;
+  }
+
+  public void updateDisplayOrder(Integer displayOrder) {
+    this.displayOrder = displayOrder;
+  }
+
 }

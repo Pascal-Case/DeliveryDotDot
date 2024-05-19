@@ -35,6 +35,7 @@ public enum ErrorCode {
   STORE_NOT_FOUND(HttpStatus.BAD_REQUEST, "가게를 찾을 수 없습니다."),
   MENU_CATEGORY_NOT_FOUND(HttpStatus.BAD_REQUEST, "메뉴 카테고리를 찾을 수 없습니다."),
   MENU_CATEGORY_HAS_MENUS(HttpStatus.BAD_REQUEST, "메뉴 카테고리에 메뉴가 존재합니다. 메뉴를 먼저 삭제해주세요."),
+  INVALID_MENU_CATEGORY_COUNT(HttpStatus.BAD_REQUEST, "메뉴 카테고리는 1개 이상 5개 이하로 등록 가능합니다."),
   ;
   private final HttpStatus httpStatus;
   private final String description;
