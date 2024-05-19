@@ -72,7 +72,8 @@ public class SecurityConfig {
             .requestMatchers("/error", "/favicon.ico", "/swagger-ui/**", "/v3/**").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/v1/stores/**").hasRole("PARTNER")
             .requestMatchers(HttpMethod.PUT, "/api/v1/stores/**").hasRole("PARTNER")
-            .requestMatchers(HttpMethod.DELETE, "/api/v1/stores").hasRole("PARTNER")
+            .requestMatchers(HttpMethod.DELETE, "/api/v1/stores", "/api/v1/stores/**")
+            .hasRole("PARTNER")
             .requestMatchers(HttpMethod.GET, "/api/v1/stores/**").permitAll()
             .anyRequest().authenticated()
 

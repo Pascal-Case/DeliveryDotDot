@@ -2,6 +2,8 @@ package jyang.deliverydotdot.service;
 
 import java.time.LocalTime;
 import java.util.List;
+import jyang.deliverydotdot.domain.Menu;
+import jyang.deliverydotdot.domain.MenuCategory;
 import jyang.deliverydotdot.domain.Partner;
 import jyang.deliverydotdot.domain.Store;
 import jyang.deliverydotdot.domain.StoreCategory;
@@ -9,6 +11,8 @@ import jyang.deliverydotdot.domain.StoreImage;
 import jyang.deliverydotdot.dto.store.StoreRegisterForm;
 import jyang.deliverydotdot.dto.store.StoreUpdateForm;
 import jyang.deliverydotdot.exception.RestApiException;
+import jyang.deliverydotdot.repository.MenuCategoryRepository;
+import jyang.deliverydotdot.repository.MenuRepository;
 import jyang.deliverydotdot.repository.StoreRepository;
 import jyang.deliverydotdot.type.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +30,10 @@ import org.springframework.web.multipart.MultipartFile;
 public class StoreService {
 
   private final StoreRepository storeRepository;
+
+  private final MenuCategoryRepository menuCategoryRepository;
+
+  private final MenuRepository menuRepository;
 
   private final StoreCategoryService storeCategoryService;
 
@@ -104,6 +112,11 @@ public class StoreService {
     // 가게 소유자 확인
     validateStoreOwner(partner, store);
 
+    // Store에 연결된 MenuCategory 삭제
+    for (MenuCategory menuCategory : store.getMenuCategories()) {
+      deleteMenuCategoryAndMenu(menuCategory);
+    }
+
     // 가게 삭제
     storeRepository.delete(store);
 
@@ -113,6 +126,19 @@ public class StoreService {
       s3Service.delete(storeImage.getImageUrl());
     }
     storeImageService.deleteStoreImages(store);
+  }
+
+  @Transactional
+  protected void deleteMenuCategoryAndMenu(MenuCategory menuCategory) {
+
+    List<Menu> menus = menuCategory.getMenus();
+
+    // MenuCategory에 연결된 Menu 삭제
+    menuRepository.deleteAll(menus);
+
+    // MenuCategory 삭제
+    menuCategoryRepository.delete(menuCategory);
+
   }
 
   /**
