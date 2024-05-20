@@ -14,7 +14,7 @@
 
 ## 기술스택
 
-[![stackticon](https://firebasestorage.googleapis.com/v0/b/stackticon-81399.appspot.com/o/images%2F1713606611798?alt=media&token=f53afd78-55d7-46cf-9ed2-ecd558b91e4c)](https://github.com/msdio/stackticon)
+[![stackticon](https://firebasestorage.googleapis.com/v0/b/stackticon-81399.appspot.com/o/images%2F1716209824785?alt=media&token=be4823e4-e131-46d0-b391-f663cef32ceb)](https://github.com/msdio/stackticon)
 
 ## 프로젝트 기능
 
@@ -147,9 +147,8 @@
 
 ## ERD
 
-![ERD](https://github.com/Pascal-Case/DeliveryDotDot/assets/152583754/d723e35a-a415-4d91-92b4-b6439c0fed46)
+![ERD](https://github.com/Pascal-Case/DeliveryDotDot/assets/152583754/b41c2af0-c68f-4e4b-adae-8c04763afbd5)
 
 ## Trouble Shooting
 
-
-
+https://github.com/Pascal-Case/DeliveryDotDot/blob/main/doc/TROUBLE_SHOOTING.md
