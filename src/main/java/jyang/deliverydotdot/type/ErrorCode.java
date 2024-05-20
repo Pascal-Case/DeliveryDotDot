@@ -57,6 +57,7 @@ public enum ErrorCode {
   OUT_OF_DELIVERY_AREA(BAD_REQUEST, "배달 가능 지역이 아닙니다."),
   ORDER_NOT_FOUND(BAD_REQUEST, "주문을 찾을 수 없습니다."),
   CAN_NOT_CHANGE_ORDER_STATUS(BAD_REQUEST, "주문 상태를 변경할 수 없습니다."),
+  INVALID_LOCATION(BAD_REQUEST, "위치 정보가 유효하지 않습니다."),
   ;
 
   private final HttpStatus httpStatus;

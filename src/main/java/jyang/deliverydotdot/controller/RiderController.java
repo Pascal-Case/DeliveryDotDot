@@ -79,4 +79,13 @@ public class RiderController {
     return ResponseEntity.ok(SuccessResponse.of("라이더 위치 정보를 성공적으로 수정했습니다."));
   }
 
+  @Operation(summary = "배달 가능 주문 목록 조회", description = "배달 가능 주문 목록 조회")
+  @GetMapping("/deliverable-orders")
+  public ResponseEntity<SuccessResponse<?>> getDeliverableOrders(
+  ) {
+    Rider rider = riderService.getRiderByLoginId(authenticationFacade.getUsername());
+    return ResponseEntity.ok(
+        SuccessResponse.of(riderService.getDeliverableOrders(rider)));
+  }
+
 }

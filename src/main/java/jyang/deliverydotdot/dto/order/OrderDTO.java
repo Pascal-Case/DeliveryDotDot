@@ -1,4 +1,4 @@
-package jyang.deliverydotdot.dto.store;
+package jyang.deliverydotdot.dto.order;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
@@ -9,8 +9,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.geo.GeoResults;
+import org.springframework.data.redis.connection.RedisGeoCommands.GeoLocation;
 
-public class StoreOrderDTO {
+public class OrderDTO {
 
   @Getter
   @Setter
@@ -84,6 +86,27 @@ public class StoreOrderDTO {
           .build();
     }
 
+  }
+
+  @Getter
+  @Setter
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @Builder
+  public static class RiderDeliverableOrders {
+
+    private Long purchaseOrderId;
+
+    private Double distance;
+
+    public static List<RiderDeliverableOrders> fromGeoResults(
+        GeoResults<GeoLocation<String>> geoResults) {
+      return geoResults.getContent().stream().map(geoResult -> RiderDeliverableOrders.builder()
+              .purchaseOrderId(Long.parseLong(geoResult.getContent().getName()))
+              .distance(geoResult.getDistance().getValue())
+              .build())
+          .toList();
+    }
   }
 
 

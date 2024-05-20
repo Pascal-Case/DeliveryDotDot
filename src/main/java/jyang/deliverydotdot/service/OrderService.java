@@ -16,7 +16,7 @@ import jyang.deliverydotdot.domain.Store;
 import jyang.deliverydotdot.domain.User;
 import jyang.deliverydotdot.domain.UserDeliveryAddress;
 import jyang.deliverydotdot.dto.order.CreateOrder.Request;
-import jyang.deliverydotdot.dto.store.StoreOrderDTO.OrderListResponse;
+import jyang.deliverydotdot.dto.order.OrderDTO.OrderListResponse;
 import jyang.deliverydotdot.exception.RestApiException;
 import jyang.deliverydotdot.repository.CartRepository;
 import jyang.deliverydotdot.repository.OrderRepository;
@@ -45,6 +45,8 @@ public class OrderService {
   private final CartRepository cartRepository;
 
   private final StoreService storeService;
+
+  private final RedisService redisService;
 
   /**
    * 주문 생성
@@ -87,6 +89,9 @@ public class OrderService {
     purchaseOrder.calculateTotalPrice();
 
     cartRepository.delete(cart);
+
+    redisService.addOrUpdateOrderLocation(purchaseOrder.getPurchaseOrderId(),
+        storeCoordinate.getX(), storeCoordinate.getY());
   }
 
 
@@ -190,16 +195,23 @@ public class OrderService {
       throw new RestApiException(ErrorCode.CAN_NOT_CHANGE_ORDER_STATUS);
     }
     order.cancel();
+    redisService.deleteOrderLocation(order.getPurchaseOrderId());
   }
 
   @Transactional
   public void cancelOrderByUser(User user, Long orderId) {
     PurchaseOrder order = getOrderById(orderId);
+
+    if (!order.getUser().equals(user)) {
+      throw new RestApiException(ErrorCode.CAN_NOT_CHANGE_ORDER_STATUS);
+    }
+
     OrderStatus orderStatus = order.getOrderStatus();
     if (orderStatus != OrderStatus.PENDING && orderStatus != OrderStatus.APPROVED) {
       throw new RestApiException(ErrorCode.CAN_NOT_CHANGE_ORDER_STATUS);
     }
     order.cancel();
+    redisService.deleteOrderLocation(order.getPurchaseOrderId());
   }
 
   @Transactional
