@@ -1,6 +1,7 @@
 package jyang.deliverydotdot.repository;
 
 import java.util.List;
+import java.util.Optional;
 import jyang.deliverydotdot.domain.User;
 import jyang.deliverydotdot.domain.UserDeliveryAddress;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,4 +20,6 @@ public interface UserDeliveryAddressRepository extends JpaRepository<UserDeliver
 
   @Query("select uda from UserDeliveryAddress uda where uda.user = :user and uda.isDefaultAddress = true")
   List<UserDeliveryAddress> findByUserOrderByDefaultAddress(User user);
+
+  Optional<UserDeliveryAddress> findByUserAndId(User user, Long addressId);
 }

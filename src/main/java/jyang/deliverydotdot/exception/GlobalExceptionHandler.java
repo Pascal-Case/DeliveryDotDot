@@ -30,8 +30,9 @@ public class GlobalExceptionHandler {
    */
   @ExceptionHandler(RestApiException.class)
   public ResponseEntity<Object> handleCustomException(RestApiException e) {
-    log.error("RestApiException occurred", e);
     ErrorCode errorCode = e.getErrorCode();
+    log.error("RestApiException occurred : ErrorCode = {} message = {}", errorCode.name(),
+        errorCode.getDescription());
     return handleExceptionInternal(errorCode);
   }
 

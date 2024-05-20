@@ -274,4 +274,16 @@ public class UserService {
         .map(AddressResponse::fromEntity)
         .toList();
   }
+
+  /**
+   * 사용자 배송지 조회
+   *
+   * @param user      사용자
+   * @param addressId 배송지 ID
+   * @return 사용자 배송지
+   */
+  public UserDeliveryAddress getUserDeliveryAddress(User user, Long addressId) {
+    return userDeliveryAddressRepository.findByUserAndId(user, addressId)
+        .orElseThrow(() -> new RestApiException(ErrorCode.ADDRESS_NOT_FOUND));
+  }
 }

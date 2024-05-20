@@ -58,7 +58,9 @@ public class SecurityConfig {
     http
         .securityMatchers(
             auth -> auth
-                .requestMatchers("/api/v1/common/**", "/api/v1/stores", "/api/v1/stores/**",
+                .requestMatchers("/api/v1/common/**",
+                    "/api/v1/stores", "/api/v1/stores/**", // 가게 관련 API
+                    "/api/v1/orders", "/api/v1/orders/**", // 주문 관련 API
                     "/api/v1/reviews/**")
 
         )
@@ -75,6 +77,10 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.DELETE, "/api/v1/stores", "/api/v1/stores/**")
             .hasRole("PARTNER")
             .requestMatchers(HttpMethod.GET, "/api/v1/stores/**").permitAll()
+
+            .requestMatchers(HttpMethod.POST, "/api/v1/orders").hasRole("USER") // 주문 생성은 USER만 가능
+            .requestMatchers(HttpMethod.DELETE, "/api/v1/orders").denyAll() // 주문 삭제는 불가능
+
             .anyRequest().authenticated()
 
         )

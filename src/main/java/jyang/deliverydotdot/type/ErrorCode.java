@@ -48,6 +48,13 @@ public enum ErrorCode {
 
   ADDRESS_NOT_FOUND(BAD_REQUEST, "배송지 정보를 찾을 수 없습니다."),
   ADDRESS_NOT_BOUND_TO_USER(BAD_REQUEST, "잘못된 배송지 정보입니다."),
+
+  ONLY_USER_CAN_ORDER(BAD_REQUEST, "주문 요청을 할 수 있는 권한이 없습니다."),
+  CART_NOT_FOUND(BAD_REQUEST, "장바구니를 찾을 수 없습니다."),
+  STORE_CLOSED(BAD_REQUEST, "영업시간이 아닙니다. 주문을 생성할 수 없습니다."),
+  INVALID_QUANTITY(BAD_REQUEST, "유효하지 않은 수량입니다."),
+  INVALID_PRICE(BAD_REQUEST, "유효하지 않은 가격입니다."),
+  OUT_OF_DELIVERY_AREA(BAD_REQUEST, "배달 가능 지역이 아닙니다."),
   ;
 
   private final HttpStatus httpStatus;

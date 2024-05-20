@@ -3,6 +3,7 @@ package jyang.deliverydotdot.service;
 import static jyang.deliverydotdot.type.ErrorCode.EXTERNAL_API_ERROR;
 import static jyang.deliverydotdot.type.ErrorCode.INVALID_REQUEST;
 import static jyang.deliverydotdot.type.ErrorCode.NO_COORDINATES_FOUND_FOR_ADDRESS;
+import static jyang.deliverydotdot.type.ErrorCode.OUT_OF_DELIVERY_AREA;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -33,6 +34,8 @@ public class LocationService {
 
   //  @Value("${spring.security.oauth2.client.registration.kakao.client-id}")
   private final String apiKey;
+
+  private static final double MAX_DELIVERY_DISTANCE = 5;
 
   public LocationService(
       RestTemplate restTemplate,
@@ -81,5 +84,19 @@ public class LocationService {
           address, ex);
       throw new RestApiException(EXTERNAL_API_ERROR);
     }
+  }
+
+  public void validateDeliveryArea(Point storeCoordinate, Point deliveryCoordinate) {
+    double distance = calculateDistance(storeCoordinate, deliveryCoordinate);
+    if (distance > MAX_DELIVERY_DISTANCE) {
+      log.error(
+          "Delivery address is out of delivery area. Store coordinate: {}, Delivery coordinate: {}, Distance: {}",
+          storeCoordinate, deliveryCoordinate, distance);
+      throw new RestApiException(OUT_OF_DELIVERY_AREA);
+    }
+  }
+
+  public double calculateDistance(Point from, Point to) {
+    return from.distance(to);
   }
 }
