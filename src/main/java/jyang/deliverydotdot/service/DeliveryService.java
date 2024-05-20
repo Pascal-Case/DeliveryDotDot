@@ -53,6 +53,12 @@ public class DeliveryService {
     Delivery delivery = getDeliveryById(deliveryId);
 
     validateDeliveryOwner(rider, delivery);
+
+    if (delivery.getDeliveryStatus() != DeliveryStatus.ASSIGNED) {
+      throw new RestApiException(ErrorCode.CAN_NOT_CHANGE_DELIVERY_STATUS);
+    }
+
+    delivery.start();
   }
 
 
@@ -62,6 +68,10 @@ public class DeliveryService {
     Delivery delivery = getDeliveryById(deliveryId);
 
     validateDeliveryOwner(rider, delivery);
+
+    if (delivery.getDeliveryStatus() != DeliveryStatus.DELIVERING) {
+      throw new RestApiException(ErrorCode.CAN_NOT_CHANGE_DELIVERY_STATUS);
+    }
 
     String imageUrl = null;
     if (completeDeliveryForm.getDeliveryCompleteImage() != null) {
@@ -77,10 +87,12 @@ public class DeliveryService {
     Delivery delivery = getDeliveryById(deliveryId);
 
     validateDeliveryOwner(rider, delivery);
+
+    delivery.fail();
   }
 
   public void validateDeliveryOwner(Rider rider, Delivery delivery) {
-    if (!delivery.getRider().equals(rider)) {
+    if (!delivery.getRider().getRiderId().equals(rider.getRiderId())) {
       throw new RestApiException(ErrorCode.NOT_OWNER_DELIVERY);
     }
   }
@@ -88,10 +100,5 @@ public class DeliveryService {
   private Delivery getDeliveryById(Long deliveryId) {
     return deliveryRepository.findById(deliveryId)
         .orElseThrow(() -> new RestApiException(ErrorCode.NOT_FOUND_DELIVERY));
-  }
-
-  public Delivery getDeliveryByOrderId(PurchaseOrder purchaseOrder) {
-    return deliveryRepository.findByPurchaseOrder(purchaseOrder)
-        .orElse(null);
   }
 }

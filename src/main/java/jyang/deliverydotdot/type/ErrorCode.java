@@ -63,7 +63,7 @@ public enum ErrorCode {
   NOT_OWNER_DELIVERY(BAD_REQUEST, "배달 담당자가 아닙니다."),
   INVALID_RATING(BAD_REQUEST, "유효하지 않은 평점입니다."),
   REVIEW_NOT_FOUND(BAD_REQUEST, "리뷰를 찾을 수 없습니다."),
-  ;
+  CAN_NOT_CHANGE_DELIVERY_STATUS(BAD_REQUEST, "배달의 상태를 변경할 수 없습니다.");
 
   private final HttpStatus httpStatus;
   private final String description;

@@ -51,8 +51,6 @@ public class OrderService {
 
   private final RedisService redisService;
 
-  private final DeliveryService deliveryService;
-
   /**
    * 주문 생성
    *
@@ -268,9 +266,9 @@ public class OrderService {
   public GetOrderDetailResponse getUserOrderDetail(User user, Long orderId) {
     PurchaseOrder order = getOrderById(orderId);
 
-    Delivery delivery = deliveryService.getDeliveryByOrderId(order);
+    Delivery delivery = order.getDelivery();
 
-    if (!order.getUser().equals(user)) {
+    if (!order.getUser().getUserId().equals(user.getUserId())) {
       throw new RestApiException(INVALID_REQUEST);
     }
 
