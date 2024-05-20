@@ -61,6 +61,8 @@ public enum ErrorCode {
   ALREADY_EXIST_DELIVERY(BAD_REQUEST, "이미 배달이 진행 중인 주문입니다."),
   NOT_FOUND_DELIVERY(BAD_REQUEST, "배달 정보를 찾을 수 없습니다."),
   NOT_OWNER_DELIVERY(BAD_REQUEST, "배달 담당자가 아닙니다."),
+  INVALID_RATING(BAD_REQUEST, "유효하지 않은 평점입니다."),
+  REVIEW_NOT_FOUND(BAD_REQUEST, "리뷰를 찾을 수 없습니다."),
   ;
 
   private final HttpStatus httpStatus;

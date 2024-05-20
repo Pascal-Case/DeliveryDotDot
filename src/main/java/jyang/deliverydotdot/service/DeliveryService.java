@@ -89,4 +89,9 @@ public class DeliveryService {
     return deliveryRepository.findById(deliveryId)
         .orElseThrow(() -> new RestApiException(ErrorCode.NOT_FOUND_DELIVERY));
   }
+
+  public Delivery getDeliveryByOrderId(PurchaseOrder purchaseOrder) {
+    return deliveryRepository.findByPurchaseOrder(purchaseOrder)
+        .orElse(null);
+  }
 }

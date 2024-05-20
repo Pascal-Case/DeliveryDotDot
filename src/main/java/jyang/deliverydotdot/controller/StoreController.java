@@ -17,6 +17,7 @@ import jyang.deliverydotdot.service.MenuCategoryService;
 import jyang.deliverydotdot.service.MenuService;
 import jyang.deliverydotdot.service.OrderService;
 import jyang.deliverydotdot.service.PartnerService;
+import jyang.deliverydotdot.service.ReviewService;
 import jyang.deliverydotdot.service.StoreService;
 import jyang.deliverydotdot.type.OrderStatus;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +50,8 @@ public class StoreController {
   private final MenuCategoryService menuCategoryService;
 
   private final OrderService orderService;
+
+  private final ReviewService reviewService;
 
   private final AuthenticationFacade authenticationFacade;
 
@@ -277,5 +280,31 @@ public class StoreController {
     );
   }
 
+  @Operation(summary = "주문 리뷰 조회", description = "주문 리뷰 조회")
+  @GetMapping("/{storeId}/orders/{orderId}/review")
+  public ResponseEntity<SuccessResponse<?>> getReview(
+      @PathVariable Long storeId,
+      @PathVariable Long orderId
+  ) {
+    Partner partner = partnerService.getPartnerByLoginId(authenticationFacade.getUsername());
+    return ResponseEntity.ok(
+        SuccessResponse.of(
+            "주문 리뷰를 성공적으로 조회했습니다.",
+            reviewService.getReviewByOrderId(partner, storeId, orderId)));
+  }
+
+  @Operation(summary = "주문 리뷰 삭제", description = "주문 리뷰 삭제")
+  @DeleteMapping("/{storeId}/orders/{orderId}/review")
+  public ResponseEntity<SuccessResponse<?>> deleteReview(
+      @PathVariable Long storeId,
+      @PathVariable Long orderId
+  ) {
+    Partner partner = partnerService.getPartnerByLoginId(authenticationFacade.getUsername());
+    reviewService.deleteReview(partner, storeId, orderId);
+
+    return ResponseEntity.ok(
+        SuccessResponse.of("주문 리뷰를 성공적으로 삭제했습니다.")
+    );
+  }
 
 }

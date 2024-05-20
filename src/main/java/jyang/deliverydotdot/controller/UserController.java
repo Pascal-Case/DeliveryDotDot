@@ -10,6 +10,7 @@ import jyang.deliverydotdot.dto.order.CreateOrder;
 import jyang.deliverydotdot.dto.response.SuccessResponse;
 import jyang.deliverydotdot.dto.user.CartDTO;
 import jyang.deliverydotdot.dto.user.CartDTO.CartItemDTO;
+import jyang.deliverydotdot.dto.user.ReviewDTO;
 import jyang.deliverydotdot.dto.user.UserDeliveryAddressDTO.AddAddressRequest;
 import jyang.deliverydotdot.dto.user.UserDeliveryAddressDTO.UpdateAddressRequest;
 import jyang.deliverydotdot.dto.user.UserJoinForm;
@@ -17,6 +18,7 @@ import jyang.deliverydotdot.dto.user.UserUpdateForm;
 import jyang.deliverydotdot.security.AuthenticationFacade;
 import jyang.deliverydotdot.service.CartService;
 import jyang.deliverydotdot.service.OrderService;
+import jyang.deliverydotdot.service.ReviewService;
 import jyang.deliverydotdot.service.UserService;
 import jyang.deliverydotdot.type.OrderStatus;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +48,8 @@ public class UserController {
   private final OrderService orderService;
 
   private final AuthenticationFacade authenticationFacade;
+
+  private final ReviewService reviewService;
 
   @Operation(summary = "유저 회원가입", description = "유저 등록 폼으로 회원가입")
   @PostMapping("/auth/join")
@@ -200,6 +204,18 @@ public class UserController {
             orderService.getUserOrder(user, pageable, status, query)));
   }
 
+  @Operation(summary = "주문 상세 조회", description = "주문 상세 조회")
+  @GetMapping("/orders/{orderId}")
+  public ResponseEntity<SuccessResponse<?>> getOrderDetail(
+      @PathVariable Long orderId
+  ) {
+    User user = userService.getUserByLoginId(authenticationFacade.getUsername());
+    return ResponseEntity.ok(
+        SuccessResponse.of(
+            "주문 상세 정보를 성공적으로 조회했습니다.",
+            orderService.getUserOrderDetail(user, orderId)));
+  }
+
   @Operation(summary = "주문 취소", description = "주문 취소")
   @PutMapping("/orders/{orderId}/cancel")
   public ResponseEntity<SuccessResponse<?>> cancelOrder(
@@ -208,5 +224,48 @@ public class UserController {
     User user = userService.getUserByLoginId(authenticationFacade.getUsername());
     orderService.cancelOrderByUser(user, orderId);
     return ResponseEntity.ok(SuccessResponse.of("주문을 성공적으로 취소했습니다."));
+  }
+
+  @Operation(summary = "리뷰 작성", description = "리뷰 작성")
+  @PostMapping("/orders/{orderId}/review")
+  public ResponseEntity<SuccessResponse<?>> createReview(
+      @PathVariable Long orderId,
+      @RequestBody @Valid ReviewDTO reviewDTO
+  ) {
+    User user = userService.getUserByLoginId(authenticationFacade.getUsername());
+    reviewService.createReview(user, orderId, reviewDTO);
+    return ResponseEntity.ok(SuccessResponse.of("리뷰를 성공적으로 작성했습니다."));
+  }
+
+  @Operation(summary = "리뷰 조회", description = "리뷰 조회")
+  @GetMapping("/orders/{orderId}/review")
+  public ResponseEntity<SuccessResponse<?>> getReview(
+      @PathVariable Long orderId
+  ) {
+    User user = userService.getUserByLoginId(authenticationFacade.getUsername());
+    return ResponseEntity.ok(SuccessResponse.of(
+        "리뷰를 성공적으로 조회했습니다.",
+        reviewService.getReviewByOrderId(user, orderId)));
+  }
+
+  @Operation(summary = "리뷰 삭제", description = "리뷰 삭제")
+  @DeleteMapping("/orders/{orderId}/review")
+  public ResponseEntity<SuccessResponse<?>> deleteReview(
+      @PathVariable Long orderId
+  ) {
+    User user = userService.getUserByLoginId(authenticationFacade.getUsername());
+    reviewService.deleteReview(user, orderId);
+    return ResponseEntity.ok(SuccessResponse.of("리뷰를 성공적으로 삭제했습니다."));
+  }
+
+  @Operation(summary = "리뷰 수정", description = "리뷰 수정")
+  @PutMapping("/orders/{orderId}/review")
+  public ResponseEntity<SuccessResponse<?>> updateReview(
+      @PathVariable Long orderId,
+      @RequestBody @Valid ReviewDTO reviewDTO
+  ) {
+    User user = userService.getUserByLoginId(authenticationFacade.getUsername());
+    reviewService.updateReview(user, orderId, reviewDTO);
+    return ResponseEntity.ok(SuccessResponse.of("리뷰를 성공적으로 수정했습니다."));
   }
 }

@@ -17,6 +17,7 @@ import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import java.util.ArrayList;
 import java.util.List;
 import jyang.deliverydotdot.type.OrderStatus;
@@ -48,6 +49,12 @@ public class PurchaseOrder extends BaseEntity {
 
   @OneToMany(mappedBy = "purchaseOrder", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
   private List<OrderItem> orderItems = new ArrayList<>();
+
+  @OneToOne(mappedBy = "purchaseOrder", fetch = FetchType.LAZY)
+  private Review review;
+
+  @OneToOne(mappedBy = "purchaseOrder", fetch = FetchType.LAZY)
+  private Delivery delivery;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)

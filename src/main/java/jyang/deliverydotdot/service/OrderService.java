@@ -3,6 +3,7 @@ package jyang.deliverydotdot.service;
 import static jyang.deliverydotdot.type.ErrorCode.ADDRESS_NOT_FOUND;
 import static jyang.deliverydotdot.type.ErrorCode.CART_NOT_FOUND;
 import static jyang.deliverydotdot.type.ErrorCode.INVALID_QUANTITY;
+import static jyang.deliverydotdot.type.ErrorCode.INVALID_REQUEST;
 import static jyang.deliverydotdot.type.ErrorCode.STORE_CLOSED;
 import static jyang.deliverydotdot.type.OrderStatus.PENDING;
 
@@ -10,12 +11,14 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import jyang.deliverydotdot.domain.Cart;
 import jyang.deliverydotdot.domain.CartItem;
+import jyang.deliverydotdot.domain.Delivery;
 import jyang.deliverydotdot.domain.Partner;
 import jyang.deliverydotdot.domain.PurchaseOrder;
 import jyang.deliverydotdot.domain.Store;
 import jyang.deliverydotdot.domain.User;
 import jyang.deliverydotdot.domain.UserDeliveryAddress;
 import jyang.deliverydotdot.dto.order.CreateOrder.Request;
+import jyang.deliverydotdot.dto.order.OrderDTO.GetOrderDetailResponse;
 import jyang.deliverydotdot.dto.order.OrderDTO.OrderListResponse;
 import jyang.deliverydotdot.exception.RestApiException;
 import jyang.deliverydotdot.repository.CartRepository;
@@ -47,6 +50,8 @@ public class OrderService {
   private final StoreService storeService;
 
   private final RedisService redisService;
+
+  private final DeliveryService deliveryService;
 
   /**
    * 주문 생성
@@ -258,5 +263,17 @@ public class OrderService {
     }
 
     return order.map(OrderListResponse::fromEntity);
+  }
+
+  public GetOrderDetailResponse getUserOrderDetail(User user, Long orderId) {
+    PurchaseOrder order = getOrderById(orderId);
+
+    Delivery delivery = deliveryService.getDeliveryByOrderId(order);
+
+    if (!order.getUser().equals(user)) {
+      throw new RestApiException(INVALID_REQUEST);
+    }
+
+    return GetOrderDetailResponse.fromEntity(order, delivery);
   }
 }

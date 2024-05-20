@@ -2,7 +2,10 @@ package jyang.deliverydotdot.dto.order;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
+import jyang.deliverydotdot.domain.Delivery;
 import jyang.deliverydotdot.domain.PurchaseOrder;
+import jyang.deliverydotdot.dto.order.OrderDTO.OrderListResponse.OrderItemListResponse;
+import jyang.deliverydotdot.type.DeliveryStatus;
 import jyang.deliverydotdot.type.OrderStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -109,5 +112,53 @@ public class OrderDTO {
     }
   }
 
+
+  @Getter
+  @Setter
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @Builder
+  public static class GetOrderDetailResponse {
+
+    private Long purchaseOrderId;
+
+    private String orderNumber;
+
+    private String deliveryAddress;
+
+    private String phone;
+
+    private Integer totalPrice;
+
+    private OrderStatus orderStatus;
+
+    private DeliveryStatus deliveryStatus;
+
+    private List<OrderItemListResponse> orderItems;
+
+    private String deliveryRequest;
+
+
+    public static GetOrderDetailResponse fromEntity(PurchaseOrder order, Delivery delivery) {
+      return GetOrderDetailResponse.builder()
+          .purchaseOrderId(order.getPurchaseOrderId())
+          .orderNumber(order.getOrderNumber())
+          .deliveryAddress(order.getDeliveryAddress())
+          .phone(order.getPhone())
+          .totalPrice(order.getTotalPrice())
+          .orderStatus(order.getOrderStatus())
+          .deliveryStatus(delivery.getDeliveryStatus())
+          .orderItems(order.getOrderItems().stream()
+              .map(orderItem -> OrderItemListResponse.builder()
+                  .orderItemId(orderItem.getOrderItemId())
+                  .menuName(orderItem.getMenu().getMenuName())
+                  .quantity(orderItem.getQuantity())
+                  .price(orderItem.getPrice())
+                  .build())
+              .toList())
+          .deliveryRequest(order.getDeliveryRequest())
+          .build();
+    }
+  }
 
 }

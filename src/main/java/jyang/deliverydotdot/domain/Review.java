@@ -1,8 +1,7 @@
 package jyang.deliverydotdot.domain;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -11,12 +10,18 @@ import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
-import jyang.deliverydotdot.type.DeliveryStatus;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import jyang.deliverydotdot.dto.user.ReviewDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Getter
@@ -24,36 +29,33 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @SuperBuilder
 @Inheritance(strategy = InheritanceType.JOINED)
-public class Delivery extends BaseEntity {
+@SQLDelete(sql = "UPDATE review SET deleted_at = now() WHERE rider_id = ?")
+@SQLRestriction("deleted_at is null")
+public class Review {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long deliveryId;
+  private Long reviewId;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "rider_id")
-  private Rider rider;
+  @JoinColumn(name = "user_id")
+  private User user;
 
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "purchase_order_id")
   private PurchaseOrder purchaseOrder;
 
-  @Enumerated(EnumType.STRING)
-  private DeliveryStatus deliveryStatus;
+  @OneToMany(mappedBy = "review", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
+  private List<ReviewImage> reviewImages = new ArrayList<>();
 
-  private String deliveryImageUrl;
+  private double rating;
 
-  public void start() {
-    this.deliveryStatus = DeliveryStatus.DELIVERING;
+  private String content;
+
+  private LocalDateTime deletedAt;
+
+  public void update(ReviewDTO reviewDTO) {
+    this.rating = reviewDTO.getRating();
+    this.content = reviewDTO.getContent();
   }
-
-  public void complete(String imageUrl) {
-    this.deliveryImageUrl = imageUrl;
-    this.deliveryStatus = DeliveryStatus.DELIVERED;
-  }
-
-  public void fail() {
-    this.deliveryStatus = DeliveryStatus.FAILED;
-  }
-
 }
