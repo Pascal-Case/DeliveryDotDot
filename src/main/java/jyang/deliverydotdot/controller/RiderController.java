@@ -7,15 +7,19 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jyang.deliverydotdot.domain.Rider;
 import jyang.deliverydotdot.dto.response.SuccessResponse;
+import jyang.deliverydotdot.dto.rider.CompleteDeliveryForm;
 import jyang.deliverydotdot.dto.rider.RiderJoinForm;
 import jyang.deliverydotdot.dto.rider.RiderUpdateForm;
 import jyang.deliverydotdot.dto.rider.RiderUpdateForm.UpdateCurrentLocation;
 import jyang.deliverydotdot.security.AuthenticationFacade;
+import jyang.deliverydotdot.service.DeliveryService;
 import jyang.deliverydotdot.service.RiderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,6 +33,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class RiderController {
 
   private final RiderService riderService;
+
+  private final DeliveryService deliveryService;
 
   private final AuthenticationFacade authenticationFacade;
 
@@ -86,6 +92,49 @@ public class RiderController {
     Rider rider = riderService.getRiderByLoginId(authenticationFacade.getUsername());
     return ResponseEntity.ok(
         SuccessResponse.of(riderService.getDeliverableOrders(rider)));
+  }
+
+  @Operation(summary = "배달 생성", description = "배달 생성")
+  @PostMapping("/deliveries/{orderId}")
+  public ResponseEntity<SuccessResponse<?>> createDelivery(
+      @PathVariable Long orderId
+  ) {
+    Rider rider = riderService.getRiderByLoginId(authenticationFacade.getUsername());
+    deliveryService.createDelivery(rider, orderId);
+    return ResponseEntity.status(CREATED).body(
+        SuccessResponse.of("배달을 성공적으로 생성했습니다.")
+    );
+  }
+
+  @Operation(summary = "배달 시작", description = "배달 시작")
+  @PutMapping("/deliveries/{deliveryId}/start")
+  public ResponseEntity<SuccessResponse<?>> startDelivery(
+      @PathVariable Long deliveryId
+  ) {
+    Rider rider = riderService.getRiderByLoginId(authenticationFacade.getUsername());
+    deliveryService.startDelivery(rider, deliveryId);
+    return ResponseEntity.ok(SuccessResponse.of("배달을 성공적으로 시작했습니다."));
+  }
+
+  @Operation(summary = "배달 완료", description = "배달 완료")
+  @PutMapping("/deliveries/{deliveryId}/complete")
+  public ResponseEntity<SuccessResponse<?>> completeDelivery(
+      @PathVariable Long deliveryId,
+      @ModelAttribute @Valid CompleteDeliveryForm completeDeliveryForm
+  ) {
+    Rider rider = riderService.getRiderByLoginId(authenticationFacade.getUsername());
+    deliveryService.completeDelivery(rider, deliveryId, completeDeliveryForm);
+    return ResponseEntity.ok(SuccessResponse.of("배달을 성공적으로 완료했습니다."));
+  }
+
+  @Operation(summary = "배달 취소", description = "배달 취소")
+  @PutMapping("/deliveries/{deliveryId}/cancel")
+  public ResponseEntity<SuccessResponse<?>> cancelDelivery(
+      @PathVariable Long deliveryId
+  ) {
+    Rider rider = riderService.getRiderByLoginId(authenticationFacade.getUsername());
+    deliveryService.cancelDelivery(rider, deliveryId);
+    return ResponseEntity.ok(SuccessResponse.of("배달을 성공적으로 취소했습니다."));
   }
 
 }
