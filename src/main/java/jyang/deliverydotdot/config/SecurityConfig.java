@@ -76,10 +76,8 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.PUT, "/api/v1/stores/**").hasRole("PARTNER")
             .requestMatchers(HttpMethod.DELETE, "/api/v1/stores", "/api/v1/stores/**")
             .hasRole("PARTNER")
+            .requestMatchers("/api/v1/stores/*/orders").hasRole("PARTNER")
             .requestMatchers(HttpMethod.GET, "/api/v1/stores/**").permitAll()
-
-            .requestMatchers(HttpMethod.POST, "/api/v1/orders").hasRole("USER") // 주문 생성은 USER만 가능
-            .requestMatchers(HttpMethod.DELETE, "/api/v1/orders").denyAll() // 주문 삭제는 불가능
 
             .anyRequest().authenticated()
 
@@ -117,7 +115,8 @@ public class SecurityConfig {
 
         .authorizeHttpRequests(request -> request
             .requestMatchers("/api/v1/users/auth/**").permitAll() // 로그인, 회원가입 허용
-            .requestMatchers("/api/v1/users/").hasRole("USER")
+            .requestMatchers("/api/v1/users").hasRole("USER")
+            .requestMatchers("/api/v1/users/**").hasRole("USER")
             .anyRequest().authenticated()
         )
 

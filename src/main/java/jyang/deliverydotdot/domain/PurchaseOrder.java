@@ -1,5 +1,8 @@
 package jyang.deliverydotdot.domain;
 
+import static jyang.deliverydotdot.type.OrderStatus.APPROVED;
+import static jyang.deliverydotdot.type.OrderStatus.REJECTED;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -81,5 +84,25 @@ public class PurchaseOrder extends BaseEntity {
         .build();
 
     orderItems.add(orderItem);
+  }
+
+  public void approve() {
+    this.orderStatus = APPROVED;
+  }
+
+  public void reject() {
+    this.orderStatus = REJECTED;
+  }
+
+  public void cook() {
+    this.orderStatus = OrderStatus.COOKING;
+  }
+
+  public void complete() {
+    this.orderStatus = OrderStatus.COOKED;
+  }
+
+  public void cancel() {
+    this.orderStatus = OrderStatus.CANCELED;
   }
 }

@@ -10,18 +10,23 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import jyang.deliverydotdot.domain.Cart;
 import jyang.deliverydotdot.domain.CartItem;
+import jyang.deliverydotdot.domain.Partner;
 import jyang.deliverydotdot.domain.PurchaseOrder;
 import jyang.deliverydotdot.domain.Store;
 import jyang.deliverydotdot.domain.User;
 import jyang.deliverydotdot.domain.UserDeliveryAddress;
 import jyang.deliverydotdot.dto.order.CreateOrder.Request;
+import jyang.deliverydotdot.dto.store.StoreOrderDTO.OrderListResponse;
 import jyang.deliverydotdot.exception.RestApiException;
 import jyang.deliverydotdot.repository.CartRepository;
 import jyang.deliverydotdot.repository.OrderRepository;
 import jyang.deliverydotdot.type.ErrorCode;
+import jyang.deliverydotdot.type.OrderStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Point;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +43,8 @@ public class OrderService {
   private final OrderRepository orderRepository;
 
   private final CartRepository cartRepository;
+
+  private final StoreService storeService;
 
   /**
    * 주문 생성
@@ -127,5 +134,117 @@ public class OrderService {
         .orderItems(new ArrayList<>())
         .deliveryRequest(deliveryRequest)
         .build();
+  }
+
+  public Slice<OrderListResponse> getStoreOrders(Partner partner, Long storeId, Pageable pageable,
+      OrderStatus status, String query) {
+    Store store = storeService.findStore(storeId);
+
+    storeService.validateStoreOwner(partner, store);
+
+    Slice<PurchaseOrder> order;
+    if (query == null && status == null) {
+      order = orderRepository.findByStore(store, pageable);
+    } else if (query == null) {
+      order = orderRepository.findByStoreAndStatus(store, status, pageable);
+    } else if (status == null) {
+      order = orderRepository.findByStoreAndQuery(store, query, pageable);
+    } else {
+      order = orderRepository.findByStoreAndStatusAndQuery(store, status, query, pageable);
+    }
+
+    return order.map(OrderListResponse::fromEntity);
+  }
+
+  @Transactional
+  public void approveOrder(Partner partner, Long storeId, Long orderId) {
+    Store store = storeService.findStore(storeId);
+    storeService.validateStoreOwner(partner, store);
+
+    PurchaseOrder order = getOrderById(orderId);
+
+    if (order.getOrderStatus() != OrderStatus.PENDING) {
+      throw new RestApiException(ErrorCode.CAN_NOT_CHANGE_ORDER_STATUS);
+    }
+
+    order.approve();
+  }
+
+  @Transactional
+  public void rejectOrder(Partner partner, Long storeId, Long orderId) {
+    Store store = storeService.findStore(storeId);
+    storeService.validateStoreOwner(partner, store);
+    PurchaseOrder order = getOrderById(orderId);
+    if (order.getOrderStatus() != OrderStatus.PENDING) {
+      throw new RestApiException(ErrorCode.CAN_NOT_CHANGE_ORDER_STATUS);
+    }
+    order.reject();
+  }
+
+  @Transactional
+  public void cancelOrderByPartner(Partner partner, Long storeId, Long orderId) {
+    Store store = storeService.findStore(storeId);
+    storeService.validateStoreOwner(partner, store);
+    PurchaseOrder order = getOrderById(orderId);
+    if (order.getOrderStatus() != OrderStatus.PENDING) {
+      throw new RestApiException(ErrorCode.CAN_NOT_CHANGE_ORDER_STATUS);
+    }
+    order.cancel();
+  }
+
+  @Transactional
+  public void cancelOrderByUser(User user, Long orderId) {
+    PurchaseOrder order = getOrderById(orderId);
+    OrderStatus orderStatus = order.getOrderStatus();
+    if (orderStatus != OrderStatus.PENDING && orderStatus != OrderStatus.APPROVED) {
+      throw new RestApiException(ErrorCode.CAN_NOT_CHANGE_ORDER_STATUS);
+    }
+    order.cancel();
+  }
+
+  @Transactional
+  public void cookOrder(Partner partner, Long storeId, Long orderId) {
+    Store store = storeService.findStore(storeId);
+    storeService.validateStoreOwner(partner, store);
+    PurchaseOrder order = getOrderById(orderId);
+    if (order.getOrderStatus() != OrderStatus.APPROVED) {
+      throw new RestApiException(ErrorCode.CAN_NOT_CHANGE_ORDER_STATUS);
+    }
+    order.cook();
+  }
+
+  @Transactional
+  public void completeOrder(Partner partner, Long storeId, Long orderId) {
+    Store store = storeService.findStore(storeId);
+    storeService.validateStoreOwner(partner, store);
+    PurchaseOrder order = getOrderById(orderId);
+    if (order.getOrderStatus() != OrderStatus.COOKING) {
+      throw new RestApiException(ErrorCode.CAN_NOT_CHANGE_ORDER_STATUS);
+    }
+    order.complete();
+  }
+
+
+  public PurchaseOrder getOrderById(Long orderId) {
+    return orderRepository.findById(orderId)
+        .orElseThrow(() -> new RestApiException(ErrorCode.ORDER_NOT_FOUND));
+  }
+
+  public Slice<OrderListResponse> getUserOrder(User user, Pageable pageable, OrderStatus status,
+      String query) {
+
+    Slice<PurchaseOrder> order;
+
+    if (query == null && status == null) {
+      order = orderRepository.findByUser(user, pageable);
+    } else if (query == null) {
+      order = orderRepository.findByUserAndStatus(user, status, pageable);
+    } else if (status == null) {
+      order = orderRepository.findByUserAndQuery(user, query, pageable);
+    } else {
+      order = orderRepository.findByUserAndStatusAndQuery(user, status, query, pageable);
+    }
+
+    return order.map(OrderListResponse::fromEntity);
   }
 }
