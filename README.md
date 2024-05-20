@@ -12,6 +12,11 @@
 
 2024.04.16 ~ 2024.05.20
 
+### 배포
+
+http://43.203.69.35:8080/swagger-ui/index.html#/
+
+
 ## 기술스택
 
 [![stackticon](https://firebasestorage.googleapis.com/v0/b/stackticon-81399.appspot.com/o/images%2F1716209824785?alt=media&token=be4823e4-e131-46d0-b391-f663cef32ceb)](https://github.com/msdio/stackticon)
