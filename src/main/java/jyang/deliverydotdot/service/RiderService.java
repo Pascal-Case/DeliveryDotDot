@@ -4,13 +4,17 @@ import static jyang.deliverydotdot.type.ErrorCode.ALREADY_REGISTERED_EMAIL;
 import static jyang.deliverydotdot.type.ErrorCode.ALREADY_REGISTERED_LOGIN_ID;
 import static jyang.deliverydotdot.type.ErrorCode.ALREADY_REGISTERED_PHONE;
 import static jyang.deliverydotdot.type.ErrorCode.INVALID_DELIVERY_METHOD;
+import static jyang.deliverydotdot.type.ErrorCode.INVALID_LOCATION;
 import static jyang.deliverydotdot.type.ErrorCode.RIDER_NOT_FOUND;
 
 import java.util.Arrays;
+import java.util.List;
 import jyang.deliverydotdot.domain.Rider;
+import jyang.deliverydotdot.dto.order.OrderDTO.RiderDeliverableOrders;
 import jyang.deliverydotdot.dto.rider.RiderInfo;
 import jyang.deliverydotdot.dto.rider.RiderJoinForm;
 import jyang.deliverydotdot.dto.rider.RiderUpdateForm;
+import jyang.deliverydotdot.dto.rider.RiderUpdateForm.UpdateCurrentLocation;
 import jyang.deliverydotdot.exception.RestApiException;
 import jyang.deliverydotdot.repository.RiderRepository;
 import jyang.deliverydotdot.type.DeliveryMethod;
@@ -29,6 +33,8 @@ public class RiderService {
   private final RiderRepository riderRepository;
 
   private final BCryptPasswordEncoder passwordEncoder;
+
+  private final RedisService redisService;
 
   /**
    * 라이더 등록
@@ -110,7 +116,7 @@ public class RiderService {
    * @param loginId 라이더 아이디
    * @return 라이더
    */
-  private Rider getRiderByLoginId(String loginId) {
+  public Rider getRiderByLoginId(String loginId) {
     return riderRepository.findByLoginId(loginId)
         .orElseThrow(() -> new RestApiException(RIDER_NOT_FOUND));
   }
@@ -173,5 +179,23 @@ public class RiderService {
         .filter(deliveryMethod -> deliveryMethod.name().equals(deliveryMethodName))
         .findAny()
         .orElseThrow(() -> new RestApiException(INVALID_DELIVERY_METHOD));
+  }
+
+  @Transactional
+  public void updateRiderLocation(Rider rider, UpdateCurrentLocation updateForm) {
+    if (updateForm.getLatitude() < -90 || updateForm.getLatitude() > 90) {
+      throw new RestApiException(INVALID_LOCATION);
+    }
+
+    if (updateForm.getLongitude() < -180 || updateForm.getLongitude() > 180) {
+      throw new RestApiException(INVALID_LOCATION);
+    }
+
+    redisService.addOrUpdateRiderLocation(rider.getRiderId(), updateForm.getLongitude(),
+        updateForm.getLatitude());
+  }
+
+  public List<RiderDeliverableOrders> getDeliverableOrders(Rider rider) {
+    return redisService.getOrdersNearby(rider.getRiderId());
   }
 }

@@ -58,7 +58,9 @@ public class SecurityConfig {
     http
         .securityMatchers(
             auth -> auth
-                .requestMatchers("/api/v1/common/**", "/api/v1/stores", "/api/v1/stores/**",
+                .requestMatchers("/api/v1/common/**",
+                    "/api/v1/stores", "/api/v1/stores/**", // 가게 관련 API
+                    "/api/v1/orders", "/api/v1/orders/**", // 주문 관련 API
                     "/api/v1/reviews/**")
 
         )
@@ -74,7 +76,9 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.PUT, "/api/v1/stores/**").hasRole("PARTNER")
             .requestMatchers(HttpMethod.DELETE, "/api/v1/stores", "/api/v1/stores/**")
             .hasRole("PARTNER")
+            .requestMatchers("/api/v1/stores/*/orders").hasRole("PARTNER")
             .requestMatchers(HttpMethod.GET, "/api/v1/stores/**").permitAll()
+
             .anyRequest().authenticated()
 
         )
@@ -111,7 +115,8 @@ public class SecurityConfig {
 
         .authorizeHttpRequests(request -> request
             .requestMatchers("/api/v1/users/auth/**").permitAll() // 로그인, 회원가입 허용
-            .requestMatchers("/api/v1/users/").hasRole("USER")
+            .requestMatchers("/api/v1/users").hasRole("USER")
+            .requestMatchers("/api/v1/users/**").hasRole("USER")
             .anyRequest().authenticated()
         )
 
