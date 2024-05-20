@@ -5,9 +5,11 @@ import static org.springframework.http.HttpStatus.CREATED;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jyang.deliverydotdot.domain.Rider;
 import jyang.deliverydotdot.dto.response.SuccessResponse;
 import jyang.deliverydotdot.dto.rider.RiderJoinForm;
 import jyang.deliverydotdot.dto.rider.RiderUpdateForm;
+import jyang.deliverydotdot.dto.rider.RiderUpdateForm.UpdateCurrentLocation;
 import jyang.deliverydotdot.security.AuthenticationFacade;
 import jyang.deliverydotdot.service.RiderService;
 import lombok.RequiredArgsConstructor;
@@ -65,6 +67,16 @@ public class RiderController {
   ) {
     riderService.deleteByLoginId(authenticationFacade.getUsername());
     return ResponseEntity.ok(SuccessResponse.of("라이더를 성공적으로 삭제했습니다."));
+  }
+
+  @Operation(summary = "라이더 위치 정보 업데이트", description = "라이더 위치 정보 업데이트")
+  @PutMapping("/location")
+  public ResponseEntity<SuccessResponse<?>> updateRiderLocation(
+      @RequestBody UpdateCurrentLocation updateForm
+  ) {
+    Rider rider = riderService.getRiderByLoginId(authenticationFacade.getUsername());
+    riderService.updateRiderLocation(rider, updateForm);
+    return ResponseEntity.ok(SuccessResponse.of("라이더 위치 정보를 성공적으로 수정했습니다."));
   }
 
 }

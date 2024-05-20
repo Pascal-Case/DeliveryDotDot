@@ -50,4 +50,19 @@ public class RiderUpdateForm {
   public void encodePassword(String encode) {
     this.password = encode;
   }
+
+
+  @Getter
+  @Setter
+  @NotBlank
+  @AllArgsConstructor
+  @Builder
+  public static class UpdateCurrentLocation {
+
+    @Schema(description = "위도", example = "37.123456")
+    private double latitude;
+
+    @Schema(description = "경도", example = "127.123456")
+    private double longitude;
+  }
 }
